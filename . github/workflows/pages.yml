@@ -20,12 +20,18 @@ jobs:
       - name: Build app
         run: |
           cd code-assist-webUI/code-assist-web
-          npm run build & node server.js & npm start # Replace with your actual build command
+          npm run build && npm start # Replace with your actual build command
           # Move build output to root /docs
           mv build ../docs  # Adjust paths to match your build output
 
       - name: Add .nojekyll
         run: touch docs/.nojekyll  # Disable Jekyll
+
+      - name: start server
+        run: |
+          cd code-assist-webUI/code-assist-web
+          npm start &  # Start the server in the background
+          sleep 10  # Wait for the server to start
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
