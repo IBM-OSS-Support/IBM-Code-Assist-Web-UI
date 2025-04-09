@@ -1,7 +1,7 @@
-name: Deploy to GitHub Pages
+name: Deploy to gh-pages
 on:
   push:
-    branches: ["main"]
+    branches: ["main"]  # Build when pushing to main
 
 jobs:
   build-deploy:
@@ -17,17 +17,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build docs
+      - name: Build app
         run: |
-          cd docs
-          npm ci
-          npm run build
-          touch .nojekyll  # Disable Jekyll
+          cd code-assist-webUI/code-assist-web
+          npm run build  # Replace with your actual build command
+          # Move build output to root /docs
+          mv build ../docs  # Adjust paths to match your build output
 
-      - name: Deploy
+      - name: Add .nojekyll
+        run: touch docs/.nojekyll  # Disable Jekyll
+
+      - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs  # Deploy the `docs` folder
-          publish_branch: gh-pages  # If using gh-pages branch
-          force_orphan: true
+          publish_branch: gh-pages  # Explicitly deploy to this branch
+          publish_dir: ./docs  # Deploy the root docs folder
+          force_orphan: true  # Clean old files
