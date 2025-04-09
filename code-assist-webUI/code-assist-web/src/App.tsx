@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes } from "react-router-dom";
 import { Theme } from '@carbon/react';
 import EvaluationReport from './components/evaluation-report/EvaluationReport';
 import Navigation from './components/layout/navigation/Navigation';

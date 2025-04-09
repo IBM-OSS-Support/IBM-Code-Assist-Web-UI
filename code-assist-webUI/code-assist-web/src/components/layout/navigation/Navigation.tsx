@@ -50,7 +50,7 @@ const Navigation: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             prefix=""
           >
             {/* Code-assist */}
-            <img alt="IBM code-assist Logo" src="/ibm-code-assist-logo.svg" width={175} height={47} title="IBM code-assist" />
+            <img alt="IBM code-assist Logo" src={`${process.env.PUBLIC_URL}/ibm-code-assist-logo.svg`} width={175} height={47} title="IBM code-assist" />
           </HeaderName>
           <SideNav
             id="side-nav"
@@ -58,16 +58,16 @@ const Navigation: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             isRail
           >
             <SideNavItems>
-              <SideNavLink renderIcon={Home} href="/dashboard" onClick={() => handleNavLinkClick('Dashboard')}>
+              <SideNavLink renderIcon={Home} href="#/dashboard" onClick={() => handleNavLinkClick('Dashboard')}>
                 Dashboard
               </SideNavLink>
-              <SideNavLink renderIcon={Folders} href="/summary" onClick={() => handleNavLinkClick('Summary')}>
+              <SideNavLink renderIcon={Folders} href="#/summary" onClick={() => handleNavLinkClick('Summary')}>
                 Summary
               </SideNavLink>
-              <SideNavLink renderIcon={Group} href="/leaderboard" onClick={() => handleNavLinkClick('Leaderboard')}>
+              <SideNavLink renderIcon={Group} href="#/leaderboard" onClick={() => handleNavLinkClick('Leaderboard')}>
                 BigCodeBench Leaderboard
               </SideNavLink>
-              <SideNavLink renderIcon={GroupResource} href="/model-comparison" onClick={() => handleNavLinkClick('EvaluationComparison')}>
+              <SideNavLink renderIcon={GroupResource} href="#/model-comparison" onClick={() => handleNavLinkClick('EvaluationComparison')}>
                 Model Comparison
               </SideNavLink>
             </SideNavItems>
