@@ -18,7 +18,7 @@
   "scripts": {
     "start": "node server.js & react-scripts start",
     "start-docs": "cd docs & npm run start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && mv build ../../docs",
     "build-docs": "cd docs & npm run build",
     "build-webui": "tsc -p tsconfig.json",
     "test": "react-scripts test",
@@ -48,5 +48,6 @@
     "@types/react-dom": "^19.0.3",
     "sass": "^1.83.4",
     "typescript": "^4.4.2"
-  }
+  },
+  "homepage": "https://ibm-oss-support.github.io/IBM-Code-Assist-Web-UI"
 }
