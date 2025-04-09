@@ -1,43 +1,50 @@
-name: Deploy to GitHub Pages
+name: GitHub Pages
 
 on:
   push:
-    branches: ["main"]  # Source code branch (e.g., main, master)
+    branches:
+      - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build docs
-        run: |
-          cd docs
-          npm ci
-          npm run build
-
-      - name: Build webui
-        run: npm run build-webui
-
-      - name: Prepare Deployment
-        run: |
-          mkdir -p dist  # Ensure dist folder exists
-          cp -r docs/* dist/  # Copy docs build to dist
-          cp -r webui/dist/* dist/  # Copy webui build to dist (adjust paths as needed)
-          touch dist/.nojekyll  # Disable Jekyll processing
-
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages  # Explicitly deploy to gh-pages branch
-          publish_dir: ./dist
-          keep_files: true
+    - uses: actions/checkout@v2
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+    
+    - name: Debug
+      run: |
+        echo "Current directory: $(pwd)"
+        ls -la
+        cat package.json
+        cat tsconfig.json
+        cat docs/package.json
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build docs
+      run: |
+        echo "Current directory: $(pwd)"
+        ls -la
+        cd docs
+        echo "Directory after cd docs: $(pwd)"
+        ls -la
+        npm run build
+        echo "Build output:"
+        ls -la
+    
+    - name: Build webui
+      run: npm run build-webui
+    
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        fsync: true
