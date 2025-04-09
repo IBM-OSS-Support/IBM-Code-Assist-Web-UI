@@ -20,7 +20,7 @@ jobs:
       - name: Build app
         run: |
           cd code-assist-webUI/code-assist-web
-          npm run build  # Replace with your actual build command
+          npm run build & npm start # Replace with your actual build command
           # Move build output to root /docs
           mv build ../docs  # Adjust paths to match your build output
 
