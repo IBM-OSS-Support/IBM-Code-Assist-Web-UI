@@ -774,9 +774,11 @@ const parseFileName = (fileName: string) => {
                     </Column>
                 ) : (
                     <Column sm={4} md={8} lg={16}>
-                        <div style={{ color: "#fff", background: "#262626", border: "0.4px solid #514f4f", borderRadius: "4px", padding: "0.7rem", textAlign: "center", boxShadow: "0 0 6px 1px rgb(0 0 17)",  margin: "1.2rem auto", width: "50%" }}>
-                            <p>No comparison found. <br /> Please select models to compare.</p>
-                        </div>
+                        {!isLoading && (
+                            <div style={{ color: "#fff", background: "#262626", border: "0.4px solid #514f4f", borderRadius: "4px", padding: "0.7rem", textAlign: "center", boxShadow: "0 0 6px 1px rgb(0 0 17)",  margin: "1.2rem auto", width: "50%" }}>
+                                <p>No comparison found. <br /> Please select models to compare.</p>
+                            </div>
+                        )}
                     </Column>
                 )
                 }
