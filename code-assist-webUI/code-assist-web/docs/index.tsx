@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from '../src/App';
 import '@carbon/styles/index.scss';
-import './styles/global.scss';
+import '../src/styles/global.scss';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
