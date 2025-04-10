@@ -7,8 +7,8 @@ import { format } from 'date-fns';
 // GitHub configuration
 const GITHUB_USERNAME = "IBM-OSS-Support";
 const REPO_BRANCH = "gh-pages";
-const GITHUB_INDEX_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/code-assist-web.github.io/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results/index.json`;
-const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/code-assist-web.github.io/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results`;
+const GITHUB_INDEX_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results/index.json`;
+const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results`;
 
 interface Model {
     name: string;
