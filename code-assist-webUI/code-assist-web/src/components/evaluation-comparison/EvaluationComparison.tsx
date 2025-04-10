@@ -3,6 +3,20 @@ import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicke
 import "./_EvaluationComparison.scss";
 import { format } from 'date-fns';
 
+
+// GitHub configuration
+const GITHUB_USERNAME = "IBM-OSS-Support";
+const REPO_BRANCH = "git-api-integration";
+const GITHUB_INDEX_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/code-assist-web.github.io/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results/index.json`;
+const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/code-assist-web.github.io/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results`;
+
+interface Model {
+    name: string;
+    created_at: string;
+    file_name: string;
+    prompt: { user: string; assistant: string; }[];
+}
+
 const ModelComparison = () => {
     const [selectedGranite, setSelectedGranite] = useState<string | null>(null);
     const [selectedOther, setSelectedOther] = useState<string | null>(null);
@@ -11,122 +25,108 @@ const ModelComparison = () => {
     const [selectedQuestions, setSelectedQuestions] = useState<{ [modelName: string]: string }>({});
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [selectedDates, setSelectedDates] = useState<{ [modelName: string]: string | null }>({});
-    // const [compareOption, setCompareOption] = useState<string>("other"); // 'granite' or 'other'
-    const [modelsData, setModelsData] = useState<Model[]>([]); // State to store fetched models data
-    const [apiError, setApiError] = useState<string | null>(null); // State to handle API errors
-    const [availableFiles, setAvailableFiles] = useState<string[]>([]); // State to store available files
+    const [modelsData, setModelsData] = useState<Model[]>([]);
+    const [apiError, setApiError] = useState<string | null>(null);
+    const [availableFiles, setAvailableFiles] = useState<string[]>([]);
     const [allFileNames, setAllFileNames] = useState<string[]>([]);
-    const [noResultsFound, setNoResultsFound] = useState<boolean>(false); // State to indicate no results found
+    const [noResultsFound, setNoResultsFound] = useState<boolean>(false);
     const [serverIP, setServerIP] = useState("localhost");
-    const [serverPort, setServerPort] = useState<number>(5005); // Default to 5001
-    // const [selectedResult, setSelectedResult] = useState<string | null>(null);
-    // const [availableResults, setAvailableResults] = useState<string[]>([]);
+    const [serverPort, setServerPort] = useState<number>(5005);
     const [filteredFileNames, setFilteredFileNames] = useState<string[]>([]);
     const [selectedResults, setSelectedResults] = useState<{ [key: string]: string }>({});
     const [codeAssistData, setCodeAssistData] = useState<any>(null);
     const [modelScores, setModelScores] = useState<{[key: string]: string}>({});
+    const [usingGitHub, setUsingGitHub] = useState(true);
 
-    interface Model {
-        name: string;
-        created_at: string;
-        file_name: string;
-        prompt: { user: string; assistant: string; }[];
-    }
-
+    // Modified backend URL detection with GitHub fallback
     const getBackendURL = () => {
-        // Use the frontend's origin to determine backend URL
         if (window.location.hostname === "localhost") {
-            console.log("🚀 Local Development");
-            return "http://localhost:5005"; // Local development
+            return "http://localhost:5005";
+        } else if (window.location.hostname === "ibm-oss-support.github.io") {
+            return ""
         } else {
-            console.log("🔥 Fyre Machine");
-            return "http://9.20.192.160:5005"; // Fyre Machine IP
+            return "http://9.20.192.160:5005";
         }
     };
-    
 
-    const fetchServerIP = async () => {
-        try {
-            const backendURL = getBackendURL();
-            const response = await fetch(`${backendURL}/server-ip`);
-            const data = await response.json();
-
-            if (data.ip) {
-                return data.ip;
-            } else {
-                console.warn("⚠️ No IP found in response:", data);
-                return "localhost";
+    // Unified data fetching
+    useEffect(() => {
+        const fetchDataSources = async () => {
+            try {
+                // Try GitHub first
+                const githubResponse = await fetch(GITHUB_INDEX_URL);
+                if (githubResponse.ok) {
+                    const indexData = await githubResponse.json();
+                    setAvailableFiles(Object.keys(indexData));
+                    setUsingGitHub(true);
+                    return;
+                }
+            } catch (githubError) {
+                console.log('Falling back to local server');
             }
-        } catch (error) {
-            console.error("❌ Error fetching server IP:", error);
-            return "localhost";
-        }
-    };
-
-    // Fetch server IP on component mount
-    useEffect(() => {
-        fetchServerIP().then(ip => setServerIP(ip));
-    }, []);
-
-    // Fetch available files (model names) on component mount
-    useEffect(() => {
-        const fetchFileNames = async () => {
+            
+            // Fallback to local server
             try {
                 const response = await fetch(`http://${serverIP}:${serverPort}/api/models`);
                 if (!response.ok) throw new Error("Failed to fetch files");
                 const files = await response.json();
                 setAvailableFiles(files);
+                setUsingGitHub(false);
             } catch (error) {
                 console.error("Error fetching files:", error);
-                setApiError("Failed to fetch available files. Please try again later.");
+                setApiError("Failed to fetch available files from both GitHub and local server.");
             }
         };
 
-        fetchFileNames();
+        fetchDataSources();
     }, [serverIP, serverPort]);
 
-
-    // Fetch models data when compare option changes or date changes
+    // Unified model data fetcher
     useEffect(() => {
         const fetchModelData = async () => {
             setIsLoading(true);
             setApiError(null);
             setNoResultsFound(false);
+            
             try {
                 const responses = await Promise.all(
                     availableFiles.map(async file => {
-                        const date = selectedDates[file] || null;
-                        let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files`).then(r => r.json());
-                        fileNames = fileNames.flat();
-
-                        // setAllFileNames(fileNames);
-                        // console.log("fileNames::>", allFileNames);
-                        
-
-                        const fileResponses: any[] = await Promise.all(
-                            fileNames.map(async (fileName: string) => {
-                                return fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files/${fileName}`)
-                                    .then((r: Response) => r.json());
-                            })
-                        );
-
-                        setAllFileNames(prev =>
-                            [...prev, ...fileNames].reduce((acc, fileName) => 
-                              acc.includes(fileName) ? acc : [...acc, fileName], [])
-                          );
-                        console.log("fileNames::>>", allFileNames);
-
-                        return fileResponses.flat();
+                        try {
+                            if (usingGitHub) {
+                                const modelUrl = `${GITHUB_BASE_URL}/${file}/index.json`;
+                                const response = await fetch(modelUrl);
+                                return response.json();
+                            } else {
+                                let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files`).then(r => r.json());
+                                fileNames = fileNames.flat();
+                                
+                                const fileResponses = await Promise.all(
+                                    fileNames.map(async (fileName: string) => {
+                                        return fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files/${fileName}`)
+                                            .then((r: Response) => r.json());
+                                    })
+                                );
+                                
+                                setAllFileNames(prev => [...new Set([...prev, ...fileNames])]);
+                                return fileResponses.flat();
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching ${file} data:`, error);
+                            return [];
+                        }
                     })
                 );
 
-                // Normalize response structure
                 const allModels = responses.flatMap(response => 
-                    Object.values(response).flat()
+                    Object.values(response).flatMap(entry => 
+                        Array.isArray(entry) ? entry : [entry]
+                    )
                 );
 
-                console.log("Normalized Models:", allModels);
                 setModelsData(allModels);
+                if (usingGitHub) {
+                    setAllFileNames(allModels.map(m => m.file_name));
+                }
             } catch (error) {
                 console.error("Error fetching models:", error);
                 setApiError("Failed to fetch models. Please try again later.");
@@ -138,7 +138,7 @@ const ModelComparison = () => {
         if (availableFiles.length > 0) {
             fetchModelData();
         }
-    }, [availableFiles, serverIP, serverPort, selectedDates]);
+    }, [availableFiles, serverIP, serverPort, selectedDates, usingGitHub]);
 
 
 

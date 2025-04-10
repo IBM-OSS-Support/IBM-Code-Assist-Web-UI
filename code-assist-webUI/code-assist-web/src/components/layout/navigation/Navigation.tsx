@@ -20,13 +20,13 @@ const Navigation: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
   React.useEffect(() => {
-    if (location.pathname === '/' || location.pathname === '/dashboard') {
+    if (location.pathname === '#/' || location.pathname === '#/dashboard') {
       setActiveTab('Dashboard');
-    } else if (location.pathname === '/summary') {
+    } else if (location.pathname === '#/summary') {
       setActiveTab('Summary');
-    } else if (location.pathname === '/leaderboard') {
+    } else if (location.pathname === '#/leaderboard') {
       setActiveTab('Leaderboard');
-    } else if (location.pathname === '/model-comparison') {
+    } else if (location.pathname === '#/model-comparison') {
       setActiveTab('EvaluationComparison');
     }
   }, [location]);
