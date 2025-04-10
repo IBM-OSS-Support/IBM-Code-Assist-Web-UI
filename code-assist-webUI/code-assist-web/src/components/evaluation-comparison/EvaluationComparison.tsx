@@ -104,11 +104,11 @@ const ModelComparison = () => {
                                   let files = await fetch(`${GITHUB_BASE_URL}/${folder}`).then(r => r.json());
                                   allFileNames = allFileNames.concat(files.flat());
                                 }
-                                
+
                                 const fileResponses = await Promise.all(
                                     allFileNames.map(async (fileName: string) => {
                                         return fetch(`${GITHUB_BASE_URL}/${file}/${fileName}`)
-                                            .then((r: Response) => r.json());
+                                            .then((r) => r.json());
                                     })
                                 );
                                 
