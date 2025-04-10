@@ -94,12 +94,12 @@ const ModelComparison = () => {
                         try {
                             if (usingGitHub) {
                                 // const modelUrl = `${GITHUB_BASE_URL}/${file}/index.json`;
-                                let fileNames = await fetch(`${GITHUB_BASE_URL}/${file}`).then(r => r.json());
+                                let fileNames = await fetch(`${GITHUB_BASE_URL}/${file}/files`).then(r => r.json());
                                 fileNames = fileNames.flat();
                                 
                                 const fileResponses = await Promise.all(
                                     fileNames.map(async (fileName: string) => {
-                                        return fetch(`${GITHUB_BASE_URL}/${file}/${fileName}`)
+                                        return fetch(`${GITHUB_BASE_URL}/${file}/files/${fileName}`)
                                             .then((r: Response) => r.json());
                                     })
                                 );
