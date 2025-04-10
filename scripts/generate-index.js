@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const PROMPT_RESULTS_DIR = path.join(__dirname, '../../code-assist-webUI/code-assist-web/src/prompt-results');
+const PROMPT_RESULTS_DIR = path.join(__dirname, '../code-assist-webUI/code-assist-web/src/prompt-results');
 const INDEX_FILE = path.join(PROMPT_RESULTS_DIR, 'index.json');
 
 function generateIndex() {
@@ -25,6 +25,10 @@ function generateIndex() {
             b.localeCompare(a) // Sorts descending by filename
         ).map(file => `${modelDir}/${file}`);
     });
+
+    if (!fs.existsSync(PROMPT_RESULTS_DIR)) {
+        fs.mkdirSync(PROMPT_RESULTS_DIR, { recursive: true });
+    }
 
     fs.writeFileSync(INDEX_FILE, JSON.stringify(index, null, 2));
     console.log('Generated index.json with models:', Object.keys(index));

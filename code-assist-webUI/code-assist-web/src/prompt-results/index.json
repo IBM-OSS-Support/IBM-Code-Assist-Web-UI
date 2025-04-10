@@ -1,0 +1,21 @@
+{
+  "claude3.5-sonnet": [
+    "claude3.5-sonnet/claude3.5sonnet_20250312T144522.json"
+  ],
+  "gpt-4o": [
+    "gpt-4o/gpt-4o_20250311T204733.json",
+    "gpt-4o/gpt-4o_20250311T203629.json"
+  ],
+  "granite3.1:8b": [
+    "granite3.1:8b/granite3.1:8b_20250302T101520.json"
+  ],
+  "granite3.2:8b": [
+    "granite3.2:8b/granite3.2:8b_20250318T093415.json",
+    "granite3.2:8b/granite3.2:8b_20250304T091520.json"
+  ],
+  "llama3.2": [
+    "llama3.2/llama3.2_20250306T164540.json",
+    "llama3.2/llama3.2_20250306T124539.json",
+    "llama3.2/llama3.2_20250306T121520.json"
+  ]
+}
