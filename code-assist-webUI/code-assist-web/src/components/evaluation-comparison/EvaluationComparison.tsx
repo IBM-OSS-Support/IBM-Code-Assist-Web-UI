@@ -39,7 +39,7 @@ const ModelComparison = () => {
     const [usingGitHub, setUsingGitHub] = useState(true);
 
     // Modified backend URL detection with GitHub fallback
-    const getBackendURL = () => {
+    const getBackendURL = () => {debugger
         if (window.location.hostname === "localhost") {
             return "http://localhost:5005";
         } else if (window.location.hostname === "ibm-oss-support.github.io") {
@@ -92,19 +92,27 @@ const ModelComparison = () => {
                 const responses = await Promise.all(
                     availableFiles.map(async file => {
                         try {
-                            if (usingGitHub) {
+                            if (window.location.hostname === "ibm-oss-support.github.io") {
                                 // const modelUrl = `${GITHUB_BASE_URL}/${file}/index.json`;
-                                let fileNames = await fetch(`${GITHUB_BASE_URL}/${file}/files`).then(r => r.json());
-                                fileNames = fileNames.flat();
+                                console.log("file::", file);
+                                
+                                let response = await fetch(GITHUB_INDEX_URL);
+                                let filesIndex = await response.json();
+                                let allFileNames: any[] = [];
+
+                                for (let folder of Object.keys(filesIndex)) {
+                                  let files = await fetch(`${GITHUB_BASE_URL}/${folder}`).then(r => r.json());
+                                  allFileNames = allFileNames.concat(files.flat());
+                                }
                                 
                                 const fileResponses = await Promise.all(
-                                    fileNames.map(async (fileName: string) => {
-                                        return fetch(`${GITHUB_BASE_URL}/${file}/files/${fileName}`)
+                                    allFileNames.map(async (fileName: string) => {
+                                        return fetch(`${GITHUB_BASE_URL}/${file}/${fileName}`)
                                             .then((r: Response) => r.json());
                                     })
                                 );
                                 
-                                setAllFileNames(prev => [...new Set([...prev, ...fileNames])]);
+                                setAllFileNames(prev => [...new Set([...prev, ...allFileNames])]);
                                 return fileResponses.flat();
                             } else {
                                 let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files`).then(r => r.json());
