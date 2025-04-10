@@ -93,9 +93,19 @@ const ModelComparison = () => {
                     availableFiles.map(async file => {
                         try {
                             if (usingGitHub) {
-                                const modelUrl = `${GITHUB_BASE_URL}/${file}/index.json`;
-                                const response = await fetch(modelUrl);
-                                return response.json();
+                                // const modelUrl = `${GITHUB_BASE_URL}/${file}/index.json`;
+                                let fileNames = await fetch(`${GITHUB_BASE_URL}/${file}`).then(r => r.json());
+                                fileNames = fileNames.flat();
+                                
+                                const fileResponses = await Promise.all(
+                                    fileNames.map(async (fileName: string) => {
+                                        return fetch(`${GITHUB_BASE_URL}/${file}/${fileName}`)
+                                            .then((r: Response) => r.json());
+                                    })
+                                );
+                                
+                                setAllFileNames(prev => [...new Set([...prev, ...fileNames])]);
+                                return fileResponses.flat();
                             } else {
                                 let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files`).then(r => r.json());
                                 fileNames = fileNames.flat();
