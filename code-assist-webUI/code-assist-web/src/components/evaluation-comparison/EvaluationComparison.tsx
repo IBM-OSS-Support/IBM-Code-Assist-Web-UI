@@ -93,16 +93,31 @@ const ModelComparison = () => {
                     availableFiles.map(async file => {
                         let allFileNames: string[] = [];
                         
-                        // Check if the file exists at the correct location
-                        const filePath = `${GITHUB_BASE_URL}/${file}`;
-                        const response = await fetch(filePath);
-                        
-                        if (!response.ok) {
+                        // Fetch the index file first
+                        const indexResponse = await fetch(GITHUB_INDEX_URL);
+                        if (!indexResponse.ok) {
+                            console.warn(`Failed to fetch index: ${GITHUB_INDEX_URL}`);
+                            return [];
+                        }
+                        const indexData = await indexResponse.json();
+        
+                        // Check if the file exists in the index
+                        if (!(file in indexData)) {
+                            console.warn(`File not found in index: ${file}`);
+                            return [];
+                        }
+        
+                        // Get the actual file path from the index
+                        const filePath = `${GITHUB_INDEX_URL}/${file}`;
+        
+                        // Fetch the actual file content
+                        const fileResponse = await fetch(filePath);
+                        if (!fileResponse.ok) {
                             console.warn(`File not found: ${filePath}`);
                             return [];
                         }
         
-                        let filesIndex: Record<string, string[]> = await response.json();
+                        let filesIndex: Record<string, string[]> = await fileResponse.json();
         
                         // Flatten the nested structure
                         Object.entries(filesIndex).forEach(([folder, files]) => {
