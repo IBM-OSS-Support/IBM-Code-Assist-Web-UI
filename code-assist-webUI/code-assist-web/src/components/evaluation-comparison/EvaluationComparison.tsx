@@ -120,7 +120,7 @@ const ModelComparison = () => {
                     availableFiles.map(async modelName => {
                         try {
                             if (window.location.hostname === "ibm-oss-support.github.io") {
-                                // Fetch the index from GitHub to get file list for the model
+                                // Fetch the index from GitHub
                                 const indexResponse = await fetch(GITHUB_INDEX_URL);
                                 const filesIndex: Record<string, string[]> = await indexResponse.json();
         
@@ -134,6 +134,7 @@ const ModelComparison = () => {
                                     throw new Error(`No valid timestamped files found for model: ${modelName}`);
                                 }
         
+                                // ✅ Final corrected URL
                                 const fileUrl = `${GITHUB_BASE_URL}/${modelName}/${latestFileName}`;
                                 console.log(`Fetching latest for ${modelName}:`, fileUrl);
         
@@ -185,7 +186,7 @@ const ModelComparison = () => {
             } finally {
                 setIsLoading(false);
             }
-        };
+        };        
         
 
         if (availableFiles.length > 0) {
