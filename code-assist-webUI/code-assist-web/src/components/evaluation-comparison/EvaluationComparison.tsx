@@ -87,76 +87,57 @@ const ModelComparison = () => {
             setIsLoading(true);
             setApiError(null);
             setNoResultsFound(false);
-            
+        
             try {
                 const responses = await Promise.all(
                     availableFiles.map(async file => {
-                        try {
-                            if (window.location.hostname === "ibm-oss-support.github.io") {
-                                // const modelUrl = `${GITHUB_BASE_URL}/${file}/index.json`;
-                                console.log("file::", file);
-                                
-                                let response = await fetch(GITHUB_INDEX_URL);
-                                let filesIndex: Record<string, string[]> = await response.json();
-
-                                let allFileNames: string[] = [];
-
-                                // Flatten the nested structure
-                                Object.entries(filesIndex).forEach(([folder, files]) => {
-                                    files.forEach(file => {
-                                        allFileNames.push(`${file}`);
-                                    });
-                                });
-
-                                console.log("All file paths:", allFileNames);
-
-                                const fileResponses = await Promise.all(
-                                    allFileNames.map(async (filePath: string) => {
-                                        try {
-                                        const response = await fetch(filePath);
-                                        if (!response.ok) {
-                                            throw new Error(`HTTP error! status: ${response.status}`);
-                                        }
-                                        const data = await response.json();
-                                        return { filePath, data };
-                                        } catch (error) {
-                                        console.error(`Error fetching ${filePath}:`, error);
-                                        return null;
-                                        }
-                                    })
-                                );
-
-                                console.log("File responses:", fileResponses);
-                                
-                                setAllFileNames(prev => [...new Set([...prev, ...allFileNames])]);
-                                return fileResponses.flat();
-                            } else {
-                                let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files`).then(r => r.json());
-                                fileNames = fileNames.flat();
-                                
-                                const fileResponses = await Promise.all(
-                                    fileNames.map(async (fileName: string) => {
-                                        return fetch(`http://${serverIP}:${serverPort}/api/models/${file}/files/${fileName}`)
-                                            .then((r: Response) => r.json());
-                                    })
-                                );
-                                
-                                setAllFileNames(prev => [...new Set([...prev, ...fileNames])]);
-                                return fileResponses.flat();
-                            }
-                        } catch (error) {
-                            console.error(`Error fetching ${file} data:`, error);
+                        let allFileNames: string[] = [];
+                        
+                        // Check if the file exists at the correct location
+                        const filePath = `${GITHUB_BASE_URL}/${file}`;
+                        const response = await fetch(filePath);
+                        
+                        if (!response.ok) {
+                            console.warn(`File not found: ${filePath}`);
                             return [];
                         }
+        
+                        let filesIndex: Record<string, string[]> = await response.json();
+        
+                        // Flatten the nested structure
+                        Object.entries(filesIndex).forEach(([folder, files]) => {
+                            files.forEach(file => {
+                                allFileNames.push(`${folder}/${file}`);
+                            });
+                        });
+        
+                        console.log("All file paths:", allFileNames);
+        
+                        const fileResponses = await Promise.all(
+                            allFileNames.map(async (filePath: string) => {
+                                try {
+                                    const response = await fetch(filePath);
+                                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                                    const data = await response.json();
+                                    return { filePath, data };
+                                } catch (error) {
+                                    console.error(`Error fetching ${filePath}:`, error);
+                                    return null;
+                                }
+                            })
+                        );
+        
+                        setAllFileNames(prev => [...new Set([...prev, ...allFileNames])]);
+                        return fileResponses.flat();
                     })
                 );
-
+        
                 const allModels = responses.flatMap(response => 
                     Object.values(response).flatMap(entry => 
                         Array.isArray(entry) ? entry : [entry]
                     )
                 );
-
+        
                 setModelsData(allModels);
                 if (usingGitHub) {
                     setAllFileNames(allModels.map(m => m.file_name));
