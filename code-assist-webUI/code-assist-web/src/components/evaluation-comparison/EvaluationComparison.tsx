@@ -97,20 +97,36 @@ const ModelComparison = () => {
                                 console.log("file::", file);
                                 
                                 let response = await fetch(GITHUB_INDEX_URL);
-                                let filesIndex = await response.json();
-                                let allFileNames: any[] = [];
+                                let filesIndex: Record<string, string[]> = await response.json();
 
-                                for (let folder of Object.keys(filesIndex)) {
-                                  let files = await fetch(`${GITHUB_BASE_URL}/${folder}`).then(r => r.json());
-                                  allFileNames = allFileNames.concat(files.flat());
-                                }
+                                let allFileNames: string[] = [];
+
+                                // Flatten the nested structure
+                                Object.entries(filesIndex).forEach(([folder, files]) => {
+                                    files.forEach(file => {
+                                        allFileNames.push(`${folder}/${file}`);
+                                    });
+                                });
+
+                                console.log("All file paths:", allFileNames);
 
                                 const fileResponses = await Promise.all(
-                                    allFileNames.map(async (fileName: string) => {
-                                        return fetch(`${GITHUB_BASE_URL}/${file}/${fileName}`)
-                                            .then((r) => r.json());
+                                    allFileNames.map(async (filePath: string) => {
+                                        try {
+                                        const response = await fetch(filePath);
+                                        if (!response.ok) {
+                                            throw new Error(`HTTP error! status: ${response.status}`);
+                                        }
+                                        const data = await response.json();
+                                        return { filePath, data };
+                                        } catch (error) {
+                                        console.error(`Error fetching ${filePath}:`, error);
+                                        return null;
+                                        }
                                     })
                                 );
+
+                                console.log("File responses:", fileResponses);
                                 
                                 setAllFileNames(prev => [...new Set([...prev, ...allFileNames])]);
                                 return fileResponses.flat();
