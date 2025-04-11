@@ -104,7 +104,7 @@ const ModelComparison = () => {
                                 // Flatten the nested structure
                                 Object.entries(filesIndex).forEach(([folder, files]) => {
                                     files.forEach(file => {
-                                        allFileNames.push(`${folder}/${file}`);
+                                        allFileNames.push(`${file}`);
                                     });
                                 });
 
