@@ -88,7 +88,7 @@ const ModelComparison = () => {
             setApiError(null);
             setNoResultsFound(false);
         
-            // Helper: Get the latest file for a model based on timestamp
+            // Helper: Extract the latest file for a model based on timestamp
             const getLatestFileName = (fileList: string[], modelName: string) => {
                 const regex = new RegExp(`${modelName.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')}_([0-9]{8}T[0-9]{6})\\.json`);
                 
@@ -120,7 +120,7 @@ const ModelComparison = () => {
                     availableFiles.map(async modelName => {
                         try {
                             if (window.location.hostname === "ibm-oss-support.github.io") {
-                                // Fetch the index from GitHub
+                                // GitHub mode
                                 const indexResponse = await fetch(GITHUB_INDEX_URL);
                                 const filesIndex: Record<string, string[]> = await indexResponse.json();
         
@@ -131,10 +131,10 @@ const ModelComparison = () => {
         
                                 const latestFileName = getLatestFileName(modelFiles, modelName);
                                 if (!latestFileName) {
-                                    throw new Error(`No valid timestamped files found for model: ${modelName}`);
+                                    throw new Error(`No valid files with timestamps found for model: ${modelName}`);
                                 }
         
-                                // ✅ Final corrected URL
+                                // ✅ Correct path: one folder, then filename
                                 const fileUrl = `${GITHUB_BASE_URL}/${modelName}/${latestFileName}`;
                                 console.log(`Fetching latest for ${modelName}:`, fileUrl);
         
@@ -147,7 +147,7 @@ const ModelComparison = () => {
                                 setAllFileNames(prev => [...new Set([...prev, latestFileName])]);
                                 return [data];
                             } else {
-                                // Local dev mode – fetch from your server
+                                // Local development mode
                                 let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${modelName}/files`).then(r => r.json());
                                 fileNames = fileNames.flat();
         
@@ -186,7 +186,7 @@ const ModelComparison = () => {
             } finally {
                 setIsLoading(false);
             }
-        };        
+        };               
         
 
         if (availableFiles.length > 0) {
