@@ -88,75 +88,97 @@ const ModelComparison = () => {
             setApiError(null);
             setNoResultsFound(false);
         
-            try {
-                const responses = await Promise.all(
-                    availableFiles.map(async file => {
-                        let allFileNames: string[] = [];
-                        
-                        // Fetch the index file first
-                        const indexResponse = await fetch(GITHUB_INDEX_URL);
-                        if (!indexResponse.ok) {
-                            console.warn(`Failed to fetch index: ${GITHUB_INDEX_URL}`);
-                            return [];
-                        }
-                        const indexData = await indexResponse.json();
+            // Helper: Get the latest file for a model based on timestamp
+            const getLatestFileName = (fileList: string[], modelName: string) => {
+                const regex = new RegExp(`${modelName.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')}_([0-9]{8}T[0-9]{6})\\.json`);
+                
+                const sorted = fileList
+                    .map(file => {
+                        const match = file.match(regex);
+                        if (!match) return null;
         
-                        // Check if the file exists in the index
-                        if (!(file in indexData)) {
-                            console.warn(`File not found in index: ${file}`);
-                            return [];
-                        }
-        
-                        // Get the actual file path from the index
-                        const filePath = `${GITHUB_INDEX_URL.split('/').slice(0, -1).join('/')}/${file}`;
-        
-                        // Fetch the actual file content
-                        const fileResponse = await fetch(filePath);
-                        if (!fileResponse.ok) {
-                            console.warn(`File not found: ${filePath}`);
-                            return [];
-                        }
-        
-                        let filesIndex: Record<string, string[]> = await fileResponse.json();
-        
-                        // Flatten the nested structure
-                        Object.entries(filesIndex).forEach(([folder, files]) => {
-                            files.forEach(file => {
-                                allFileNames.push(`${folder}/${file}`);
-                            });
-                        });
-        
-                        console.log("All file paths:", allFileNames);
-        
-                        const fileResponses = await Promise.all(
-                            allFileNames.map(async (filePath: string) => {
-                                try {
-                                    const response = await fetch(filePath);
-                                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                                    const data = await response.json();
-                                    return { filePath, data };
-                                } catch (error) {
-                                    console.error(`Error fetching ${filePath}:`, error);
-                                    return null;
-                                }
-                            })
+                        const timestamp = match[1];
+                        const date = new Date(
+                            Number(timestamp.slice(0, 4)),
+                            Number(timestamp.slice(4, 6)) - 1,
+                            Number(timestamp.slice(6, 8)),
+                            Number(timestamp.slice(9, 11)),
+                            Number(timestamp.slice(11, 13)),
+                            Number(timestamp.slice(13, 15))
                         );
         
-                        setAllFileNames(prev => [...new Set([...prev, ...allFileNames])]);
-                        return fileResponses.flat();
+                        return { file, date };
+                    })
+                    .filter(Boolean)
+                    .sort((a, b) => b!.date.getTime() - a!.date.getTime());
+        
+                return sorted.length > 0 ? sorted[0]!.file : null;
+            };
+        
+            try {
+                const responses = await Promise.all(
+                    availableFiles.map(async modelName => {
+                        try {
+                            if (window.location.hostname === "ibm-oss-support.github.io") {
+                                // Fetch the index from GitHub to get file list for the model
+                                const indexResponse = await fetch(GITHUB_INDEX_URL);
+                                const filesIndex: Record<string, string[]> = await indexResponse.json();
+        
+                                const modelFiles = filesIndex[modelName];
+                                if (!modelFiles || modelFiles.length === 0) {
+                                    throw new Error(`No files found for model: ${modelName}`);
+                                }
+        
+                                const latestFileName = getLatestFileName(modelFiles, modelName);
+                                if (!latestFileName) {
+                                    throw new Error(`No valid timestamped files found for model: ${modelName}`);
+                                }
+        
+                                const fileUrl = `${GITHUB_BASE_URL}/${modelName}/${latestFileName}`;
+                                console.log(`Fetching latest for ${modelName}:`, fileUrl);
+        
+                                const response = await fetch(fileUrl);
+                                if (!response.ok) {
+                                    throw new Error(`Failed to fetch ${fileUrl}`);
+                                }
+        
+                                const data = await response.json();
+                                setAllFileNames(prev => [...new Set([...prev, latestFileName])]);
+                                return [data];
+                            } else {
+                                // Local dev mode – fetch from your server
+                                let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${modelName}/files`).then(r => r.json());
+                                fileNames = fileNames.flat();
+        
+                                const fileResponses = await Promise.all(
+                                    fileNames.map(async (fileName: string) => {
+                                        return fetch(`http://${serverIP}:${serverPort}/api/models/${modelName}/files/${fileName}`)
+                                            .then((r: Response) => r.json());
+                                    })
+                                );
+        
+                                setAllFileNames(prev => [...new Set([...prev, ...fileNames])]);
+                                return fileResponses.flat();
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching ${modelName} data:`, error);
+                            return [];
+                        }
                     })
                 );
         
-                const allModels = responses.flatMap(response => 
-                    Object.values(response).flatMap(entry => 
+                const allModels = responses.flatMap(response =>
+                    Object.values(response).flatMap(entry =>
                         Array.isArray(entry) ? entry : [entry]
                     )
                 );
         
                 setModelsData(allModels);
+        
                 if (usingGitHub) {
                     setAllFileNames(allModels.map(m => m.file_name));
                 }
+        
             } catch (error) {
                 console.error("Error fetching models:", error);
                 setApiError("Failed to fetch models. Please try again later.");
@@ -164,6 +186,7 @@ const ModelComparison = () => {
                 setIsLoading(false);
             }
         };
+        
 
         if (availableFiles.length > 0) {
             fetchModelData();
