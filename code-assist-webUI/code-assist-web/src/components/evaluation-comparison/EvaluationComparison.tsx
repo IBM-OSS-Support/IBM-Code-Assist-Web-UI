@@ -108,7 +108,7 @@ const ModelComparison = () => {
                         }
         
                         // Get the actual file path from the index
-                        const filePath = `${GITHUB_INDEX_URL}/${file}`;
+                        const filePath = `${GITHUB_INDEX_URL.split('/').slice(0, -1).join('/')}/${file}`;
         
                         // Fetch the actual file content
                         const fileResponse = await fetch(filePath);
