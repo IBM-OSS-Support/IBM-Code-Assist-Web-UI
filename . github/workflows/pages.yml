@@ -1,44 +1,47 @@
 name: Deploy to GitHub Pages
+
 on:
-  push:
-    branches: ["main"]
+  workflow_run:
+    workflows: ["Update Prompt Results Index"]
+    types:
+      - completed
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
 
-      - name: Install dependencies
-        run: |
-          cd code-assist-webUI/code-assist-web
-          npm ci
+    - name: Install Dependencies
+      run: |
+        cd code-assist-webUI/code-assist-web
+        npm ci
 
-      - name: Build app
-        run: |
-          cd code-assist-webUI/code-assist-web
-          npm run build  # Builds to root/docs
+    - name: Build App
+      run: |
+        cd code-assist-webUI/code-assist-web
+        npm run build  # Outputs to ./docs
 
-      - name: Add .nojekyll
-        run: touch docs/.nojekyll
+    - name: Add .nojekyll
+      run: touch code-assist-webUI/code-assist-web/docs/.nojekyll
 
-      - name: Generate index.json
-        run: |
-          node scripts/generate-index.js
+    - name: Verify contents
+      run: |
+        ls -la code-assist-webUI/code-assist-web/docs
 
-      - name: Verify deployment contents
-        run: |
-          ls -la code-assist-webUI/code-assist-web/src/prompt-results
-
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          publish_branch: gh-pages
-          force_orphan: true
+    - name: Deploy to gh-pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: code-assist-webUI/code-assist-web/docs
+        publish_branch: gh-pages
+        force_orphan: true
+        commit_message: "Deploy to GitHub Pages"

@@ -1,4 +1,5 @@
 name: Update Prompt Results Index
+
 on:
   push:
     branches: [ main ]
@@ -9,6 +10,7 @@ on:
 jobs:
   update-index:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -22,8 +24,9 @@ jobs:
 
     - name: Generate index.json
       run: |
+        cd code-assist-webUI/code-assist-web
         node scripts/generate-index.js
-        
+
     - name: Commit and push changes
       run: |
         git config --global user.name "GitHub Actions"

@@ -144,7 +144,17 @@ const ModelComparison = () => {
                                 }
         
                                 const data = await response.json();
-                                setAllFileNames(prev => [...new Set([...prev, latestFileName])]);
+                                setAllFileNames(prev => [
+                                    ...new Set([
+                                        ...(prev || []), // Handle initial undefined
+                                        ...(usingGitHub 
+                                            ? [latestFileName].filter(f => 
+                                                typeof f === 'string' && f.trim() !== ''
+                                              )
+                                            : [latestFileName]
+                                        )
+                                    ])
+                                ]);                                
                                 return [data];
                             } else {
                                 // Local development mode
@@ -154,11 +164,21 @@ const ModelComparison = () => {
                                 const fileResponses = await Promise.all(
                                     fileNames.map(async (fileName: string) => {
                                         return fetch(`http://${serverIP}:${serverPort}/api/models/${modelName}/files/${fileName}`)
-                                            .then((r: Response) => r.json());
+                                            .then((r: Response) => r.json() as Promise<string[]>);
                                     })
                                 );
         
-                                setAllFileNames(prev => [...new Set([...prev, ...fileNames])]);
+                                setAllFileNames(prev => [
+                                    ...new Set([
+                                        ...(prev || []), // Handle initial undefined
+                                        ...(usingGitHub 
+                                            ? [fileNames]
+                                            : fileNames.filter((f: string) => 
+                                                typeof f === 'string' && f.trim() !== ''
+                                              )
+                                        )
+                                    ])
+                                ]);                                
                                 return fileResponses.flat();
                             }
                         } catch (error) {
@@ -216,16 +236,29 @@ const ModelComparison = () => {
     console.log("Other Models:", otherModels);
 
 
-    // Add utility functions for filename parsing
-const parseFileName = (fileName: string) => {
-    const match = fileName.match(/^(.+?)_(\d{8}T\d{6})\.json$/);
-    if (!match) return null;
-    return {
-      modelName: match[1], // "granite3.1:8b"
-      timestamp: match[2], // "20250302T101520"
-      fullName: fileName
+    // Add null/undefined checks and safe defaults
+    const parseFileName = (fileName?: string) => {
+        // Add fallback for undefined/empty filename
+        if (!fileName || typeof fileName !== 'string') {
+        return {
+            modelName: 'Invalid Filename',
+            timestamp: '00000000T000000',
+            fullName: 'invalid_filename.json'
+        };
+        }
+    
+        const match = fileName.match(/^(.+?)_(\d{8}T\d{6})\.json$/);
+        
+        return match ? {
+        modelName: match[1], // "granite3.1:8b"
+        timestamp: match[2], // "20250302T101520"
+        fullName: fileName
+        } : {
+        modelName: 'Invalid Format',
+        timestamp: '00000000T000000',
+        fullName: fileName
+        };
     };
-  };
   
   const getModelBaseName = (fileName: string) => {
     const parts = fileName.split('_');
@@ -235,29 +268,29 @@ const parseFileName = (fileName: string) => {
   
     // Updating getModelDetails function
     const getModelDetails = (name: string): { model: Model | undefined; modelJsonFiles: string[] } => {
-        if (!modelsData || allFileNames.length === 0) {
-            return { model: undefined, modelJsonFiles: [] };
+        if (!modelsData || !Array.isArray(allFileNames) || allFileNames.length === 0) {
+          return { model: undefined, modelJsonFiles: [] };
         }
-    
-        // Filter files based on model name only
+      
+        // Add null check for parsed files
         const modelJsonFiles = allFileNames
-            .map(fileName => parseFileName(fileName))
-            .filter(file => {
-                if (!file) return false;
-                const baseName = getModelBaseName(file.modelName);
-                return baseName.toLowerCase() === name.toLowerCase();
-            })    
-            .sort((a, b) => (a?.timestamp || '').localeCompare(b?.timestamp || ''))
-            .map(file => file?.fullName || '');
-    
-        // Find model data for selected result
-        const selectedResult = selectedResults[name];
-        const modelData = selectedResult 
-            ? flattenedModels.find(m => m.file_name === selectedResult)
-            : flattenedModels.find(m => m.name === name);
-    
-        return { model: modelData, modelJsonFiles };
-    };
+          .map(fileName => parseFileName(fileName))
+          .filter((file): file is NonNullable<ReturnType<typeof parseFileName>> => !!file)
+          .filter(file => {
+            const baseName = getModelBaseName(file.modelName);
+            return baseName.toLowerCase() === name.toLowerCase();
+          })    
+          .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+          .map(file => file.fullName);
+      
+        // Add fallback for undefined modelData
+        const modelData = (flattenedModels.find(m => m?.name === name) || {}) as Model;
+      
+        return { 
+          model: modelData.name ? modelData : undefined,
+          modelJsonFiles 
+        };
+    };      
     
     // update filtered files when dates change
     useEffect(() => {
@@ -282,24 +315,27 @@ const parseFileName = (fileName: string) => {
 
     // Add this after line 153 in your EvaluationComparison.tsx file
     const countFilesForModel = (modelName: string) => {
-        const model = getModelDetails(modelName);
-        if (!model) {
-            console.warn(`Model with name ${modelName} not found`);
-            return 0;
-        }
-
-        const existingFilePrefixes = allFileNames.filter(name => name.split('_')[0]).map(prefix => prefix.split('_')[0]);
-        const modelPrefixCount = existingFilePrefixes.filter(prefix => prefix === modelName.split('_')[0]).length;
-        const newFileCount = allFileNames.filter(fileName => 
-          !existingFilePrefixes.includes(fileName.split('_')[0])
-        ).length;
-        const filesCount = modelPrefixCount;
+        if (!Array.isArray(allFileNames)) return 0;
         
-        console.log(`Number of files for model ${modelName}: ${filesCount}`);
-        console.log(`Occurrences of '${modelName}' prefix in existing files: ${modelPrefixCount}`);
-
-        return filesCount;
+        return allFileNames
+            .filter(fileName => {
+                // Validate filename before processing
+                if (typeof fileName !== 'string' || fileName.trim() === '') {
+                    return false;
+                }
+                
+                const parts = fileName.split('_');
+                return parts.length > 0 && parts[0] === modelName.split('_')[0];
+            })
+            .length;
     };
+
+    useEffect(() => {
+        // Cleanup existing undefined values
+        setAllFileNames(prev => 
+            (prev || []).filter(f => typeof f === 'string' && f.trim() !== '')
+        );
+    }, []);
 
     // To handle auto-selection of single results
     useEffect(() => {
