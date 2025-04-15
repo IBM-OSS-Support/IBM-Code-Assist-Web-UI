@@ -135,7 +135,7 @@ const ModelComparison = () => {
                                 }
         
                                 // ✅ Correct path: one folder, then filename
-                                const fileUrl = `${GITHUB_BASE_URL}/${modelName}/${latestFileName}`;
+                                const fileUrl = `${GITHUB_BASE_URL}/${latestFileName}`;
                                 console.log(`Fetching latest for ${modelName}:`, fileUrl);
         
                                 const response = await fetch(fileUrl);
