@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 const GITHUB_USERNAME = "IBM-OSS-Support";
 const REPO_BRANCH = "gh-pages";
 const GITHUB_INDEX_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results/index.json`;
-const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results`;
+const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src`;
 
 interface Model {
     name: string;
@@ -135,7 +135,7 @@ const ModelComparison = () => {
                                 }
         
                                 // ✅ Correct path: one folder, then filename
-                                const fileUrl = `${GITHUB_BASE_URL}/${latestFileName}`;
+                                const fileUrl = `${GITHUB_BASE_URL}/prompt-results/${latestFileName}`;
                                 console.log(`Fetching latest for ${modelName}:`, fileUrl);
         
                                 const response = await fetch(fileUrl);
@@ -366,7 +366,7 @@ const ModelComparison = () => {
         const fetchCodeAssistData = async () => {
             try {
                 const backendURL = getBackendURL();
-                const response = await fetch(`${backendURL}/api/code-assist`);
+                const response = await fetch(`${GITHUB_BASE_URL}/code-assist-data.json`);
                 const data = await response.json();
                 setCodeAssistData(data);
                 
