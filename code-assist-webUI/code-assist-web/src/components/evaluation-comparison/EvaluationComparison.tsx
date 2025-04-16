@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicker, DatePickerInput, RadioButton, RadioButtonGroup, Tag, Dropdown } from "@carbon/react";
+import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicker, DatePickerInput, RadioButton, RadioButtonGroup, Tag, Dropdown, CodeSnippet, Tooltip } from "@carbon/react";
 import "./_EvaluationComparison.scss";
 import { format } from 'date-fns';
+import { FlashFilled, Help } from "@carbon/react/icons";
 
 
 // GitHub configuration
@@ -14,6 +15,7 @@ interface Model {
     name: string;
     created_at: string;
     file_name: string;
+    total_time: string
     prompt: { user: string; assistant: string; }[];
 }
 
@@ -37,6 +39,7 @@ const ModelComparison = () => {
     const [codeAssistData, setCodeAssistData] = useState<any>(null);
     const [modelScores, setModelScores] = useState<{[key: string]: string}>({});
     const [usingGitHub, setUsingGitHub] = useState(false);
+    const [fastestTime, setFastestTime] = useState<number | null>(null);
 
     // Modified backend URL detection with GitHub fallback
     const getBackendURL = () => {
@@ -344,6 +347,22 @@ const ModelComparison = () => {
             prev.filter(f => typeof f === 'string' && f.trim() !== '')
         );
     }, []);
+
+
+    // Update the useEffect that processes the models to determine the fastest time
+    useEffect(() => {
+        if (modelsData.length > 0) {
+            // Find the fastest model
+            const times = modelsData
+                .filter(model => model.total_time)
+                .map(model => Number(model.total_time));
+                
+            if (times.length > 0) {
+                const fastest = Math.min(...times);
+                setFastestTime(fastest);
+            }
+        }
+    }, [modelsData]);
     
 
     // To handle auto-selection of single results
@@ -452,24 +471,26 @@ const ModelComparison = () => {
     
             // Add code block
             parts.push(
-                <code key={offset} style={{ 
-                    backgroundColor: "#101010", 
-                    padding: "2px 10px", 
-                    borderRadius: "4px", 
-                    display: "block", 
-                    wordBreak: "break-word",
-                    margin: "8px 0",
-                    overflowX: "auto",
-                    letterSpacing: "0.025em",
-                    WebkitOverflowScrolling: "touch"
-                }}>
+                // <code key={offset} style={{ 
+                //     backgroundColor: "#101010", 
+                //     padding: "2px 10px", 
+                //     borderRadius: "4px", 
+                //     display: "block", 
+                //     wordBreak: "break-word",
+                //     margin: "8px 0",
+                //     overflowX: "auto",
+                //     letterSpacing: "0.025em",
+                //     WebkitOverflowScrolling: "touch"
+                // }}>
+                <CodeSnippet key={offset} type="multi" feedback="Copied to clipboard">
                     {codeBlock.split("\n").map((line: string, index: number) => (
                         <React.Fragment key={`${offset}-code-${index}`}>
                             <span>{line}</span>
                             <br />
                         </React.Fragment>
                     ))}
-                </code>
+                </CodeSnippet>
+                // </code>
             );
     
             lastIndex = offset + match.length;
@@ -579,6 +600,26 @@ const ModelComparison = () => {
 
                                 console.log("modelmodel::", model);
 
+                                // const fastestTime = Math.min(
+                                //     ...(model.model?.total_time !== undefined 
+                                //       ? [Number(model.model.total_time)]
+                                //       : [])
+                                //   );
+
+                               // Initialize fastestTime if it's not set
+                                if (!fastestTime && model?.model?.total_time) {
+                                    setFastestTime(Number(model.model.total_time));
+                                }
+
+                                // Check if current model is the fastest
+                                const isFastest = model?.model?.total_time 
+                                    ? Number(model.model.total_time) === fastestTime
+                                    : false;
+
+                                console.log(
+                                    `model :: time: ${model?.model?.total_time}, isFastest: ${isFastest}`
+                                );
+
                                 if (model) {
                                     const numberOfFiles = countFilesForModel(modelName);
                                     console.log(`countFilesForModel for ${model}: ${numberOfFiles}`);
@@ -666,6 +707,35 @@ const ModelComparison = () => {
                                                 : 'cyan'
                                             }>{modelScores[model?.model?.name ?? ''] || 'N/A'}</Tag>
                                             
+                                        </div>
+
+                                        <div className="time-taken-wrap">
+                                            <p>
+                                                <strong>
+                                                Total Time Taken{" "}
+                                                {/* <Tooltip
+                                                    autoAlign
+                                                    label={"Total Time Taken to Complete all Prompts."}
+                                                    closeOnActivation={false}
+                                                > */}
+                                                    <span><Help width={"0.75rem"} height={"0.75rem"} /></span>
+                                                {/* </Tooltip> */}
+                                                :
+                                                </strong>
+                                                <span
+                                                    style={{
+                                                        paddingLeft: "0.3rem",
+                                                        display: "inline-flex",
+                                                        alignItems: "center",
+                                                        gap: "0.25rem",
+                                                    }}
+                                                >
+                                                    {typeof model?.model?.total_time === "number" ? `${(model.model.total_time / 1000).toFixed(2)}s` : "--"}
+                                                    {!isFastest && (
+                                                        <span className="flash-icon"><FlashFilled size={14} color="#facc15" strokeWidth={2} /></span>
+                                                    )}
+                                                </span>
+                                            </p>
                                         </div>
 
                                         <div style={{ margin: "0.5rem 0"}}>

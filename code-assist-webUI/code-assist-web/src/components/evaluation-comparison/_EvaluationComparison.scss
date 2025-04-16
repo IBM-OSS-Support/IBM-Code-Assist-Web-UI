@@ -208,6 +208,64 @@
         font-weight: bold;
     }
   }
+
+  .time-taken-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 0.2rem 0 0.8rem;
+
+    > p > strong > span {
+      position: relative;
+      vertical-align: middle;
+      margin: 0 0.2rem 0 0;
+
+      &:hover {
+        &::after {
+          content: "Total Time Taken to Complete all Prompts.";
+          position: absolute;
+          bottom: 1.4rem;
+          left: -6.5rem;
+          background: #000011;
+          color: #ffffff;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          z-index: 1;
+          box-shadow: 0 0 4px 1px rgb(96 96 96 / 80%);
+          width: 250px;
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+      }
+    }
+
+    .flash-icon {
+      position: relative;
+
+      &:hover {
+        &::after {
+          content: "Quickest reply provided among these Models.";
+          position: absolute;
+          bottom: 1.4rem;
+          left: -3.5rem;
+          background: #000011;
+          color: #ffffff;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          z-index: 1;
+          box-shadow: 0 0 4px 1px rgb(96 96 96 / 80%);
+          width: 150px;
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+      }
+    }
+  }
 }
 // .flatpickr-calendar.open {
 //     inline-size: 23.5rem !important;
