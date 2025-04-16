@@ -36,14 +36,15 @@ const ModelComparison = () => {
     const [selectedResults, setSelectedResults] = useState<{ [key: string]: string }>({});
     const [codeAssistData, setCodeAssistData] = useState<any>(null);
     const [modelScores, setModelScores] = useState<{[key: string]: string}>({});
-    const [usingGitHub, setUsingGitHub] = useState(true);
+    const [usingGitHub, setUsingGitHub] = useState(false);
 
     // Modified backend URL detection with GitHub fallback
-    const getBackendURL = () => {debugger
+    const getBackendURL = () => {
         if (window.location.hostname === "localhost") {
             return "http://localhost:5005";
         } else if (window.location.hostname === "ibm-oss-support.github.io") {
-            return ""
+            setUsingGitHub(true);
+            return (usingGitHub);
         } else {
             return "http://9.20.192.160:5005";
         }
@@ -134,7 +135,12 @@ const ModelComparison = () => {
                                     throw new Error(`No valid files with timestamps found for model: ${modelName}`);
                                 }
         
-                                // ✅ Correct path: one folder, then filename
+                                // Validate filename before adding
+                                if (typeof latestFileName !== 'string' || latestFileName.trim() === '') {
+                                    console.error('Invalid filename:', latestFileName);
+                                    return [];
+                                }
+        
                                 const fileUrl = `${GITHUB_BASE_URL}/prompt-results/${latestFileName}`;
                                 console.log(`Fetching latest for ${modelName}:`, fileUrl);
         
@@ -146,19 +152,17 @@ const ModelComparison = () => {
                                 const data = await response.json();
                                 setAllFileNames(prev => [
                                     ...new Set([
-                                        ...(prev || []), // Handle initial undefined
-                                        ...(usingGitHub 
-                                            ? [latestFileName].filter(f => 
-                                                typeof f === 'string' && f.trim() !== ''
-                                              )
-                                            : [latestFileName]
-                                        )
+                                        ...prev,
+                                        latestFileName
                                     ])
                                 ]);                                
                                 return [data];
                             } else {
                                 // Local development mode
-                                let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${modelName}/files`).then(r => r.json());
+                                let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${modelName}/files`)
+                                    .then(r => r.json())
+                                    .then(files => files.filter((f: any) => typeof f === 'string' && f.trim() !== ''));
+        
                                 fileNames = fileNames.flat();
         
                                 const fileResponses = await Promise.all(
@@ -168,17 +172,16 @@ const ModelComparison = () => {
                                     })
                                 );
         
-                                setAllFileNames(prev => [
-                                    ...new Set([
-                                        ...(prev || []), // Handle initial undefined
-                                        ...(usingGitHub 
-                                            ? [fileNames]
-                                            : fileNames.filter((f: string) => 
-                                                typeof f === 'string' && f.trim() !== ''
-                                              )
-                                        )
-                                    ])
-                                ]);                                
+                                setAllFileNames(prev => {
+                                    const newFiles = fileNames
+                                        .filter((f: string) => 
+                                            typeof f === 'string' && 
+                                            f.trim() !== '' && 
+                                            !prev.includes(f)
+                                        );
+                                    return [...prev, ...newFiles];
+                                });
+                                
                                 return fileResponses.flat();
                             }
                         } catch (error) {
@@ -197,7 +200,13 @@ const ModelComparison = () => {
                 setModelsData(allModels);
         
                 if (usingGitHub) {
-                    setAllFileNames(allModels.map(m => m.file_name));
+                    setAllFileNames(prev => [
+                        ...new Set([
+                            ...prev,
+                            ...allModels.map(m => m.file_name)
+                                .filter(f => typeof f === 'string' && f.trim() !== '')
+                        ])
+                    ]);
                 }
         
             } catch (error) {
@@ -208,12 +217,11 @@ const ModelComparison = () => {
             }
         };               
         
-
+    
         if (availableFiles.length > 0) {
             fetchModelData();
         }
     }, [availableFiles, serverIP, serverPort, selectedDates, usingGitHub]);
-
 
 
     // Prepare model lists
@@ -330,12 +338,13 @@ const ModelComparison = () => {
             .length;
     };
 
+    // Cleanup effect to remove empty strings from allFileNames
     useEffect(() => {
-        // Cleanup existing undefined values
         setAllFileNames(prev => 
-            (prev || []).filter(f => typeof f === 'string' && f.trim() !== '')
+            prev.filter(f => typeof f === 'string' && f.trim() !== '')
         );
     }, []);
+    
 
     // To handle auto-selection of single results
     useEffect(() => {
@@ -358,7 +367,7 @@ const ModelComparison = () => {
         });
       }, [availableFiles, selectedDates]);
     
-    console.log("modelsData:", modelsData);
+    console.log("availableFiles", availableFiles, "modelsData:", modelsData);
     console.log("Potentially problematic models:", modelsData.filter(model => !model.name));
 
     // for fetching pass@1 score fron code-assist-data.json file
@@ -813,7 +822,7 @@ const ModelComparison = () => {
 
                                         <div className={solidBackgrounds[model?.model?.name ?? 'default'] ? "chat-screen solid-bg" : "chat-screen"}>
                                             <div className="date-capsule-wrap">
-                                                <Tag className="date-capsule" type="warm-grey">
+                                                <Tag className="date-capsule" type="warm-gray">
                                                     {selectedDates[model?.model?.name ?? 'default'] 
                                                     ? format(new Date(selectedDates[model?.model?.name ?? 'default'] || ''), 'dd-MM-yyyy')
                                                     : 'Today'}
