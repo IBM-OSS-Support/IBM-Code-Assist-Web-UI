@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicker, DatePickerInput, RadioButton, RadioButtonGroup, Tag, Dropdown, CodeSnippet, Tooltip } from "@carbon/react";
 import "./_EvaluationComparison.scss";
-import { format } from 'date-fns';
+import { format, isValid, parse } from "date-fns";
 import { FlashFilled, Help } from "@carbon/react/icons";
 
 
@@ -606,11 +606,16 @@ const ModelComparison = () => {
                                 //       : [])
                                 //   );
 
-                               // Initialize fastestTime if it's not set
-                                if (!fastestTime && model?.model?.total_time) {
-                                    setFastestTime(Number(model.model.total_time));
+                               // Initialize fastestTime if it's not set or is greater than the current model's time
+                                if (model?.model?.total_time && model.model?.total_time !== undefined) {
+                                    const currentModelTime = Number(model.model.total_time);
+                                    
+                                    // Check if the current model time is a valid number
+                                    if (!isNaN(currentModelTime) && (fastestTime === null || currentModelTime < fastestTime)) {
+                                    setFastestTime(currentModelTime); // Update to the smallest time
+                                    }
                                 }
-
+                                
                                 // Check if current model is the fastest
                                 const isFastest = model?.model?.total_time 
                                     ? Number(model.model.total_time) === fastestTime
@@ -667,7 +672,22 @@ const ModelComparison = () => {
                                     return formattedDate === selectedDates[getModelName() ?? '']; // Ensure date formats match
                                 });
 
-                                console.log(`Model: ${model?.model?.name}, Selected Date: ${selectedDates[modelName]}`);
+                                // Assuming you have access to the prompt's creation date (string or Date)
+                                // Grab the raw date
+                                const promptCreateRaw = model?.model?.created_at;
+
+                                // Convert safely to a Date object
+                                const parsedDate = promptCreateRaw
+                                ? parse(promptCreateRaw, "yyyyMMdd'T'HHmmss", new Date())
+                                : null;
+
+                                // Format only if valid
+                                const formattedPromptDate = parsedDate && isValid(parsedDate)
+                                ? format(parsedDate, 'dd MMM yyyy hh:mmaaa')
+                                : format(new Date(), 'dd MMM yyyy hh:mmaaa');
+
+
+                                console.log(`Model: ${model?.model?.name}, Selected Date: ${formattedPromptDate}`);
                                 console.log(`Prompts:`, model?.model?.prompt);
                                 console.log(`Filtered Prompts:`, filteredPrompts);
 
@@ -730,10 +750,21 @@ const ModelComparison = () => {
                                                         gap: "0.25rem",
                                                     }}
                                                 >
-                                                    {typeof model?.model?.total_time === "number" ? `${(model.model.total_time / 1000).toFixed(2)}s` : "--"}
-                                                    {!isFastest && (
-                                                        <span className="flash-icon"><FlashFilled size={14} color="#facc15" strokeWidth={2} /></span>
-                                                    )}
+                                                   {typeof model?.model?.total_time === "number" && !isNaN(model.model.total_time)
+                                                    ? (
+                                                        fastestTime !== null && (
+                                                            <>
+                                                                <span>{(model.model.total_time / 1000).toFixed(2)}s </span>
+                                                                {fastestTime === model.model.total_time && (
+                                                                    <span className="flash-icon">
+                                                                        <FlashFilled size={14} color="#facc15" strokeWidth={2} />
+                                                                    </span>
+                                                                )}
+                                                            </>
+                                                        )
+                                                    )
+                                                    : "--"
+                                                    }
                                                 </span>
                                             </p>
                                         </div>
@@ -893,9 +924,9 @@ const ModelComparison = () => {
                                         <div className={solidBackgrounds[model?.model?.name ?? 'default'] ? "chat-screen solid-bg" : "chat-screen"}>
                                             <div className="date-capsule-wrap">
                                                 <Tag className="date-capsule" type="warm-gray">
-                                                    {selectedDates[model?.model?.name ?? 'default'] 
-                                                    ? format(new Date(selectedDates[model?.model?.name ?? 'default'] || ''), 'dd-MM-yyyy')
-                                                    : 'Today'}
+                                                    {selectedDates[model?.model?.name ?? 'default']
+                                                    ? format(new Date(selectedDates[model?.model?.name ?? 'default'] || ''), 'dd-MM-yyyy h:mmaaa')
+                                                    : formattedPromptDate}
                                                 </Tag>
                                             </div>
                                             {filteredPrompts && filteredPrompts.length === 0 ? (

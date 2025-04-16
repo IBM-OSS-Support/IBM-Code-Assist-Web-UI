@@ -266,6 +266,14 @@
       }
     }
   }
+  .cds--snippet--multi {
+    background: #000011;
+    &.cds--snippet--has-right-overflow {
+      &:after {
+        background-image: linear-gradient(to right, #0000, #000000);
+      }
+    }
+  }
 }
 // .flatpickr-calendar.open {
 //     inline-size: 23.5rem !important;
