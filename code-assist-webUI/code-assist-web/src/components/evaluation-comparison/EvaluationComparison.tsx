@@ -124,39 +124,38 @@ const ModelComparison = () => {
                                 // GitHub mode
                                 const indexResponse = await fetch(GITHUB_INDEX_URL);
                                 const filesIndex: Record<string, string[]> = await indexResponse.json();
-        
+                            
                                 const modelFiles = filesIndex[modelName];
                                 if (!modelFiles || modelFiles.length === 0) {
                                     throw new Error(`No files found for model: ${modelName}`);
                                 }
-        
-                                const latestFileName = getLatestFileName(modelFiles, modelName);
-                                if (!latestFileName) {
-                                    throw new Error(`No valid files with timestamps found for model: ${modelName}`);
-                                }
-        
-                                // Validate filename before adding
-                                if (typeof latestFileName !== 'string' || latestFileName.trim() === '') {
-                                    console.error('Invalid filename:', latestFileName);
-                                    return [];
-                                }
-        
-                                const fileUrl = `${GITHUB_BASE_URL}/prompt-results/${latestFileName}`;
-                                console.log(`Fetching latest for ${modelName}:`, fileUrl);
-        
-                                const response = await fetch(fileUrl);
-                                if (!response.ok) {
-                                    throw new Error(`Failed to fetch ${fileUrl}`);
-                                }
-        
-                                const data = await response.json();
+                            
+                                // Fetch ALL files for this model
+                                const validFiles = modelFiles.filter(file => 
+                                    typeof file === 'string' && 
+                                    file.trim() !== '' && 
+                                    file.endsWith('.json')
+                                );
+                            
+                                // Fetch all files instead of just the latest
+                                const fileResponses = await Promise.all(
+                                    validFiles.map(async fileName => {
+                                        const fileUrl = `${GITHUB_BASE_URL}/prompt-results/${fileName}`;
+                                        const response = await fetch(fileUrl);
+                                        if (!response.ok) throw new Error(`Failed to fetch ${fileUrl}`);
+                                        return response.json();
+                                    })
+                                );
+                            
+                                // Add all valid files to allFileNames
                                 setAllFileNames(prev => [
                                     ...new Set([
                                         ...prev,
-                                        latestFileName
+                                        ...validFiles
                                     ])
-                                ]);                                
-                                return [data];
+                                ]);
+                            
+                                return fileResponses;
                             } else {
                                 // Local development mode
                                 let fileNames = await fetch(`http://${serverIP}:${serverPort}/api/models/${modelName}/files`)
@@ -181,6 +180,7 @@ const ModelComparison = () => {
                                         );
                                     return [...prev, ...newFiles];
                                 });
+                                console.log(`local All files for ${modelName}:`, allFileNames);
                                 
                                 return fileResponses.flat();
                             }
