@@ -28,6 +28,8 @@ export const ActiveTabProvider: React.FC<ActiveTabProviderProps> = ({ value, chi
       setActiveTab('BigCodeBench Leaderboard');
     } else if (pathname === '#/model-comparison') {
       setActiveTab('Model Comparison');
+    } else if (pathname === '#/model-server-logs') {
+      setActiveTab('Model Server Logs');
     }
   }, []);
 

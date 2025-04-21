@@ -7,6 +7,7 @@ import MainHeader from './components/layout/main-header/MainHeader';
 import Dashboard from "./components/layout/dashboard/Dashboard";
 import Leaderboard from './components/evaluation-metrics/EvaluationMetrics';
 import EvaluationComparison from './components/evaluation-comparison/EvaluationComparison';
+import ModelServerLogs from './components/model-server-logs/ModelServerLogs';
 
 const App: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const App: React.FC = () => {
               <Route path="/summary" element={<EvaluationReport />} />
               <Route path='/leaderboard' element={<Leaderboard />} />
               <Route path='/model-comparison' element={<EvaluationComparison />} />
+              <Route path='/model-server-logs' element={<ModelServerLogs />} />
             </Routes>
           </Router>
         </div>

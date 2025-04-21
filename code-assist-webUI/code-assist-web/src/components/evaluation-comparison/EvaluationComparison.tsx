@@ -732,15 +732,8 @@ const ModelComparison = () => {
                                         <div className="time-taken-wrap">
                                             <p>
                                                 <strong>
-                                                Total Time Taken{" "}
-                                                {/* <Tooltip
-                                                    autoAlign
-                                                    label={"Total Time Taken to Complete all Prompts."}
-                                                    closeOnActivation={false}
-                                                > */}
-                                                    <span><Help width={"0.75rem"} height={"0.75rem"} /></span>
-                                                {/* </Tooltip> */}
-                                                :
+                                                    Response Time{" "} <span><Help width={"0.75rem"} height={"0.75rem"} /></span>
+                                                    :
                                                 </strong>
                                                 <span
                                                     style={{
