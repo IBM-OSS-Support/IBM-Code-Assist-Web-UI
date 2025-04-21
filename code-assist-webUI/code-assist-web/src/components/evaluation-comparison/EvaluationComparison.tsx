@@ -292,16 +292,30 @@ const ModelComparison = () => {
           .filter(file => {
             const baseName = getModelBaseName(file.modelName);
             return baseName.toLowerCase() === name.toLowerCase();
-          })    
-          .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-          .map(file => file.fullName);
-      
+          });
+
+        // If using GitHub and modelJsonFiles is empty, attempt to fetch files from the GitHub index
+        if (usingGitHub && modelJsonFiles.length === 0) {
+          const githubFiles = availableFiles.filter(fileName => {
+            const parsedFile = parseFileName(fileName);
+            if (!parsedFile) return false;
+            const baseName = getModelBaseName(parsedFile.modelName);
+            return baseName.toLowerCase() === name.toLowerCase();
+          });
+
+          modelJsonFiles.push(...githubFiles.map(fileName => parseFileName(fileName)));
+        }
+
+        const sortedModelJsonFiles = modelJsonFiles
+            .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+            .map(file => file.fullName);
+
         // Add fallback for undefined modelData
         const modelData = (flattenedModels.find(m => m?.name === name) || {}) as Model;
       
         return { 
           model: modelData.name ? modelData : undefined,
-          modelJsonFiles 
+          modelJsonFiles: sortedModelJsonFiles
         };
     };      
     
