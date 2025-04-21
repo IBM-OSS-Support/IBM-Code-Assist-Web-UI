@@ -20,16 +20,18 @@ const Navigation: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
   React.useEffect(() => {
-    if (location.pathname === '#/' || location.pathname === '#/dashboard') {
+    if (location.pathname === '#/') {
+      setActiveTab('Welcome Folks...');
+    } else if (location.pathname === '#/dashboard') {
       setActiveTab('Dashboard');
     } else if (location.pathname === '#/summary') {
       setActiveTab('Summary');
     } else if (location.pathname === '#/leaderboard') {
-      setActiveTab('Leaderboard');
+      setActiveTab('BigCodeBench Leaderboard');
     } else if (location.pathname === '#/model-comparison') {
-      setActiveTab('EvaluationComparison');
+      setActiveTab('Model Comparison');
     } else if (location.pathname === '#/model-server-logs') {
-      setActiveTab('ModelServerLogs');
+      setActiveTab('Model Server Logs');
     }
   }, [location]);
 
@@ -66,13 +68,13 @@ const Navigation: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <SideNavLink renderIcon={Folders} href="#/summary" onClick={() => handleNavLinkClick('Summary')}>
                 Summary
               </SideNavLink>
-              <SideNavLink renderIcon={Group} href="#/leaderboard" onClick={() => handleNavLinkClick('Leaderboard')}>
+              <SideNavLink renderIcon={Group} href="#/leaderboard" onClick={() => handleNavLinkClick('BigCodeBench Leaderboard')}>
                 BigCodeBench Leaderboard
               </SideNavLink>
-              <SideNavLink renderIcon={Compare} href="#/model-comparison" onClick={() => handleNavLinkClick('EvaluationComparison')}>
+              <SideNavLink renderIcon={Compare} href="#/model-comparison" onClick={() => handleNavLinkClick('Model Comparison')}>
                 Model Comparison
               </SideNavLink>
-              <SideNavLink renderIcon={CloudLogging} href="#/model-server-logs" onClick={() => handleNavLinkClick('ModelServerLogs')}>
+              <SideNavLink renderIcon={CloudLogging} href="#/model-server-logs" onClick={() => handleNavLinkClick('Model Server Logs')}>
                 Model Server Logs
               </SideNavLink>
             </SideNavItems>

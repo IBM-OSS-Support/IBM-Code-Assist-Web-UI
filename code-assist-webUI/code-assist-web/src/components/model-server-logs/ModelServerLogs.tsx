@@ -26,7 +26,7 @@ interface LogFile {
 
 const headers: { key: keyof LogFile; header: string }[] = [
   { key: "name", header: "Log File Name" },
-  { key: "date", header: "Created Date" },
+  { key: "date", header: "Generated Date" },
 ];
 
 const GITHUB_USERNAME = "IBM-OSS-Support";
