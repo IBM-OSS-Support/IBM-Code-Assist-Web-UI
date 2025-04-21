@@ -1,7 +1,7 @@
 import React, { useState, createContext, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderMenuButton, HeaderName, SideNav, SideNavItems, SideNavLink, Theme } from '@carbon/react';
-import {Home, UserAvatar, Folders, Group, GroupResource, ServerDns} from '@carbon/react/icons';
+import {Home, UserAvatar, Folders, Group, GroupResource, ServerDns, CloudLogging, Compare} from '@carbon/react/icons';
 import { ActiveTabProvider } from './use-active-tab/UseActiveTab';
 import "./_Navigation.scss";
 
@@ -69,10 +69,10 @@ const Navigation: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <SideNavLink renderIcon={Group} href="#/leaderboard" onClick={() => handleNavLinkClick('Leaderboard')}>
                 BigCodeBench Leaderboard
               </SideNavLink>
-              <SideNavLink renderIcon={GroupResource} href="#/model-comparison" onClick={() => handleNavLinkClick('EvaluationComparison')}>
+              <SideNavLink renderIcon={Compare} href="#/model-comparison" onClick={() => handleNavLinkClick('EvaluationComparison')}>
                 Model Comparison
               </SideNavLink>
-              <SideNavLink renderIcon={ServerDns} href="#/model-server-logs" onClick={() => handleNavLinkClick('ModelServerLogs')}>
+              <SideNavLink renderIcon={CloudLogging} href="#/model-server-logs" onClick={() => handleNavLinkClick('ModelServerLogs')}>
                 Model Server Logs
               </SideNavLink>
             </SideNavItems>
