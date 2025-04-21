@@ -3,6 +3,7 @@ import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicke
 import "./_EvaluationComparison.scss";
 import { format, isValid, parse } from "date-fns";
 import { FlashFilled, Help } from "@carbon/react/icons";
+import { se } from "date-fns/locale";
 
 
 // GitHub configuration
@@ -40,6 +41,7 @@ const ModelComparison = () => {
     const [modelScores, setModelScores] = useState<{[key: string]: string}>({});
     const [usingGitHub, setUsingGitHub] = useState(false);
     const [fastestTime, setFastestTime] = useState<number | null>(null);
+    const [filteredPrompts, setFilteredPrompts] = useState<{ [key: string]: any[] }>({});
 
     // Modified backend URL detection with GitHub fallback
     const getBackendURL = () => {
@@ -421,14 +423,40 @@ const ModelComparison = () => {
         fetchCodeAssistData();
     }, []);
 
-    // Add this utility function to normalize model names
-    const normalizeModelName = (name: string) => {
-        return name.toLowerCase()
-            .replace(/[.:]/g, '-')
-            .replace(/\s+/g, '-')
-            .replace(/-+instruct/g, '');
-    };
-
+    // To Recalculate filteredPrompts
+    // useEffect(() => {
+    //     const updateFilteredPrompts = () => {
+    //         const updatedPrompts: { [key: string]: any[] } = {};
+    
+    //         Object.keys(selectedResults).forEach((modelName) => {
+    //             const selectedFileName = selectedResults[modelName];
+    //             const model = modelsData.flatMap((entry) =>
+    //                 Object.values(entry).flat()
+    //             ).find((m) =>
+    //                 m.name && modelName &&
+    //                 m.name.toLowerCase().trim() === modelName.toLowerCase().trim() &&
+    //                 m.file_name === selectedFileName && selectedFileName
+    //             );
+    
+    //             if (model && selectedFileName) {
+    //                 const parsedFile = parseFileName(selectedFileName);
+    //                 if (parsedFile) {
+    //                     const prompts = model.prompt.filter((prompt: { user: string; assistant: string }) => {
+    //                         const promptDate = parsedFile.timestamp.substring(0, 8); // Extract date from the selected file
+    //                         const createdAtDate = model.created_at.substring(0, 8); // Extract date from the model's created_at
+    //                         return promptDate === createdAtDate;
+    //                     });
+    
+    //                     updatedPrompts[modelName] = prompts;
+    //                 }
+    //             }
+    //         });
+    
+    //         setFilteredPrompts(updatedPrompts);
+    //     };
+    
+    //     updateFilteredPrompts();
+    // }, [selectedResults, modelsData]);
 
     const handleCompare = () => {
         if (selectedGranite && selectedOther) {
@@ -626,7 +654,7 @@ const ModelComparison = () => {
                                 );
 
                                 if (model) {
-                                    const numberOfFiles = countFilesForModel(modelName);
+                                    const numberOfFiles = countFilesForModel(model.model?.name || '');
                                     console.log(`countFilesForModel for ${model}: ${numberOfFiles}`);
                                 }
 
@@ -638,39 +666,93 @@ const ModelComparison = () => {
                                     questionNumbers.push(...model.model.prompt.map((_, index) => `Question ${index + 1}`));
                                 }
 
-                                const filteredPrompts = model?.model?.prompt?.filter((prompt) => {
-                                    // Initialize selectedDates with an empty string if it doesn't exist
-                                    const modelName = model?.model?.name ?? '';
+                                const filteredPrompts = modelsData
+                                    .flatMap((entry) => Object.values(entry).flat())
+                                    .filter((m) => m.name === model?.model?.name)
+                                    .flatMap((m) => {
+                                        const selectedFileName = selectedResults[model?.model?.name ?? ''];
+                                        if (selectedFileName && m.file_name === selectedFileName) {
+                                            // Ensure the selected file's model name matches the current model name
+                                            const parsedFile = parseFileName(selectedFileName);
+                                            if (parsedFile?.modelName === model?.model?.name) {
+                                                return m.prompt || [];
+                                            }
+                                        }
+                                        // If no result is selected, show the latest prompts
+                                        if (!selectedFileName) {
+                                            const latestFileName = model?.modelJsonFiles?.[model?.modelJsonFiles?.length - 1];
+                                            if (latestFileName && m.file_name === latestFileName) {
+                                                return m.prompt || [];
+                                            }
+                                        }
+                                        return [];
+                                    })
+                                    .filter((prompt) => {
+                                        const modelName = model?.model?.name ?? '';
 
-                                    console.log("modelName:::", modelName, "modelJsonFiles", model?.modelJsonFiles);
+                                        console.log("modelName:::", modelName, "modelJsonFiles", model?.modelJsonFiles);
 
-                                    // If no date is selected for this model, show all prompts
-                                    if (!selectedDates[modelName]) {
-                                        return true;
+                                        // If no date is selected for this model, show all prompts
+                                        if (!selectedDates[modelName]) {
+                                            return true;
+                                        }
+
+                                        const createdAtDate = model?.model?.created_at ? new Date(
+                                            Number(model?.model?.created_at.substring(0, 4)),
+                                            Number(model?.model?.created_at.substring(4, 6)) - 1,
+                                            Number(model?.model?.created_at.substring(6, 8)),
+                                            Number(model?.model?.created_at.substring(9, 11)),
+                                            Number(model?.model?.created_at.substring(11, 13))
+                                        ) : null;
+
+                                        console.log(`filteredPrompts -- createdAtDate for ${model?.model?.name}:`, createdAtDate);
+
+                                        if (!createdAtDate || isNaN(createdAtDate.getTime())) return false;
+
+                                        const formattedDate = createdAtDate.toLocaleDateString('en-GB').split('/').reverse().join('-');  // Convert to DD-MM-YYYY
+
+                                        console.log(`filteredPrompts -- formattedDate for ${model?.model?.name}:`, formattedDate, `selectedDates[modelName]:`, selectedDates[modelName]);
+
+                                        const getModelName = (): string | undefined => {
+                                            return model?.model?.name;
+                                        };
+
+                                        return formattedDate === selectedDates[getModelName() ?? '']; // Ensure date formats match
+                                    });
+
+                                // Store all selected files' prompts
+                                const allSelectedPrompts = Object.keys(selectedResults).reduce((acc, modelName) => {
+                                    const selectedFileName = selectedResults[modelName];
+                                    const model = modelsData.flatMap((entry) =>
+                                        Object.values(entry).flat()
+                                    ).find((m) =>
+                                        m.name && modelName &&
+                                        m.name.toLowerCase().trim() === modelName.toLowerCase().trim() &&
+                                        m.file_name === selectedFileName && selectedFileName
+                                    );
+                                    console.log("allSelectedPrompts::", modelName, selectedFileName, model);
+                                    
+
+                                    if (model && selectedFileName) {
+                                        const parsedFile = parseFileName(selectedFileName);
+                                        if (parsedFile) {
+                                            const prompts = model.prompt.filter((prompt: { user: string; assistant: string }) => {
+                                                // Match the selected file's timestamp with the prompt's creation date
+                                                const promptDate = parsedFile.timestamp.substring(0, 8); // Extract date from the selected file
+                                                const createdAtDate = model.created_at.substring(0, 8); // Extract date from the model's created_at
+                                                return promptDate === createdAtDate;
+                                            });
+
+                                            // Add the prompts to the accumulator with the JSON file name as the key
+                                            acc[selectedFileName] = prompts;
+                                        }
                                     }
 
-                                    const createdAtDate = model?.model?.created_at ? new Date(
-                                        Number(model?.model?.created_at.substring(0, 4)),
-                                        Number(model?.model?.created_at.substring(4, 6)) - 1,
-                                        Number(model?.model?.created_at.substring(6, 8)),
-                                        Number(model?.model?.created_at.substring(9, 11)),
-                                        Number(model?.model?.created_at.substring(11, 13))
-                                    ) : null;
+                                    return acc;
+                                }, {} as { [key: string]: any[] });
 
-                                    console.log(`filteredPrompts -- createdAtDate for ${model?.model?.name}:`, createdAtDate);
-
-                                    if (!createdAtDate || isNaN(createdAtDate.getTime())) return false;
-                                    
-                                    const formattedDate = createdAtDate.toLocaleDateString('en-GB').split('/').reverse().join('-');  // Convert to DD-MM-YYYY
-
-                                    console.log(`filteredPrompts -- formattedDate for ${model?.model?.name}:`, formattedDate , `selectedDates[modelName]:`, selectedDates[modelName]);
-
-                                    const getModelName = (): string | undefined => {
-                                        return model?.model?.name;
-                                    };
-
-                                    return formattedDate === selectedDates[getModelName() ?? '']; // Ensure date formats match
-                                });
+                                console.log("All Selected Prompts:", allSelectedPrompts);
+                                
 
                                 // Assuming you have access to the prompt's creation date (string or Date)
                                 // Grab the raw date
@@ -826,14 +908,14 @@ const ModelComparison = () => {
                                                             if (!item) return 'Select Result';
                                                             const parsed = parseFileName(item);
                                                             if (!parsed) return item;
-                                                            
+
                                                             // Format timestamp to DD-MM-YYYY HH:MM am/pm
                                                             const datePart = parsed.timestamp.substring(0, 8);
                                                             const timePart = parsed.timestamp.substring(9);
                                                             const year = datePart.substring(0, 4);
                                                             const month = datePart.substring(4, 6);
                                                             const day = datePart.substring(6, 8);
-                                                            
+
                                                             const hours = parseInt(timePart.substring(0, 2));
                                                             const minutes = timePart.substring(2, 4);
                                                             const ampm = hours >= 12 ? 'pm' : 'am';
@@ -843,15 +925,29 @@ const ModelComparison = () => {
                                                         }}
                                                         onChange={({ selectedItem }) => {
                                                             const currentModelName = model?.model?.name as string;
-                                                            setSelectedResults(prev => ({
+                                                            setSelectedResults((prev) => ({
                                                                 ...prev,
-                                                                [currentModelName]: selectedItem as string
+                                                                [currentModelName]: selectedItem as string,
                                                             }));
+
+                                                            // Update filtered prompts based on the selected result
+                                                            const selectedFileName = selectedItem as string;
+                                                            const filteredPrompts = modelsData
+                                                                .flatMap((entry) => Object.values(entry).flat())
+                                                                .filter((model) => model.file_name === selectedFileName)
+                                                                .flatMap((model) => model.prompt || []);
+
+                                                            setFilteredPrompts((prev) => ({
+                                                                ...prev,
+                                                                [model?.model?.name || '']: filteredPrompts,
+                                                            }));
+
+                                                            console.log(`Filtered Prompts for ${model?.model?.name}:`, filteredPrompts);
                                                         }}
                                                         selectedItem={selectedResults[model?.model?.name as string] || null}
                                                         titleText="Select a Result"
                                                         placeholder="Choose a result version"
-                                                        shouldFilterItem={({ item, inputValue }) => 
+                                                        shouldFilterItem={({ item, inputValue }) =>
                                                             item.toLowerCase().includes(inputValue?.toLowerCase() || '')
                                                         }
                                                         disabled={!model?.modelJsonFiles?.length}
