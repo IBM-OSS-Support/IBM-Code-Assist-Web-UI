@@ -142,7 +142,6 @@ const ModelComparison = () => {
                                         file.trim() !== '' && 
                                         file.endsWith('.json')
                                     )
-                                    .map(file => file.split('/').pop() || file); // Extract only the file name
                             
                                 // Fetch all files instead of just the latest
                                 const fileResponses = await Promise.all(
@@ -154,11 +153,14 @@ const ModelComparison = () => {
                                     })
                                 );
                             
+                                const allValidFiles = validFiles
+                                    .map(file => file.split('/').pop() || file); // Extract only the file name
+
                                 // Add all valid files to allFileNames
                                 setAllFileNames(prev => [
                                     ...new Set([
                                         ...prev,
-                                        ...validFiles
+                                        ...allValidFiles
                                     ])
                                 ]);
                             
