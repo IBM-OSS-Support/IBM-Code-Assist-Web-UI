@@ -67,21 +67,46 @@ const LogsTable: React.FC = () => {
           if (!response.ok) throw new Error("Failed to fetch log files");
           const files: string[] = await response.json();
       
-          const formattedFiles: LogFile[] = files.map((file) => {
+          const now = new Date();
+      
+          const formattedFiles: { name: string; date: string; rawDate?: Date }[] = files.map((file) => {
             const fileNameWithoutLogs = file.replace("logs/", "");
             const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
-            const date = match ? formatDate(match[1]) : "Unknown Date";
-            return { name: fileNameWithoutLogs, date };
+      
+            let rawDate;
+            let dateStr = "Unknown Date";
+            if (match) {
+              const parsed = match[1];
+              rawDate = new Date(
+                `${parsed.substring(0, 4)}-${parsed.substring(4, 6)}-${parsed.substring(6, 8)}T${parsed.substring(9, 11)}:${parsed.substring(11, 13)}:${parsed.substring(13, 15)}`
+              );
+              dateStr = rawDate.toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              }).replace(",", "");
+            }
+      
+            return {
+              name: fileNameWithoutLogs,
+              date: dateStr,
+              rawDate,
+            };
           });
       
-          // Sort by actual date descending (most recent first)
+          // Sort by closest to today's date
           formattedFiles.sort((a, b) => {
-            const dateA = new Date(a.date);
-            const dateB = new Date(b.date);
-            return dateB.getTime() - dateA.getTime(); // Descending
+            const diffA = a.rawDate ? Math.abs(now.getTime() - a.rawDate.getTime()) : Infinity;
+            const diffB = b.rawDate ? Math.abs(now.getTime() - b.rawDate.getTime()) : Infinity;
+            return diffA - diffB;
           });
       
-          setLogFiles(formattedFiles);
+          // Drop rawDate before saving to state
+          setLogFiles(formattedFiles.map(({ name, date }) => ({ name, date })));
         } catch (error) {
           console.error("Error fetching log files:", error);
         }
