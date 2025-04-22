@@ -134,13 +134,15 @@ const ModelComparison = () => {
                                 if (!modelFiles || modelFiles.length === 0) {
                                     throw new Error(`No files found for model: ${modelName}`);
                                 }
-                            
+
                                 // Fetch ALL files for this model
-                                const validFiles = modelFiles.filter(file => 
-                                    typeof file === 'string' && 
-                                    file.trim() !== '' && 
-                                    file.endsWith('.json')
-                                );
+                                const validFiles = modelFiles
+                                    .filter(file => 
+                                        typeof file === 'string' && 
+                                        file.trim() !== '' && 
+                                        file.endsWith('.json')
+                                    )
+                                    .map(file => file.split('/').pop() || file); // Extract only the file name
                             
                                 // Fetch all files instead of just the latest
                                 const fileResponses = await Promise.all(
