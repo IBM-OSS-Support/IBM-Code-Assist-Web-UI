@@ -18,7 +18,7 @@
   "scripts": {
     "start": "node server.js & react-scripts start",
     "start-docs": "cd docs & npm run start",
-    "build": "react-scripts build && node ../../scripts/generate-index.js && mv build ../../docs",
+    "build": "react-scripts build && node ../../scripts/generate-index.js && mv build/* ../../docs",
     "build-docs": "cd docs & npm run build",
     "build-webui": "tsc -p tsconfig.json",
     "test": "react-scripts test",
