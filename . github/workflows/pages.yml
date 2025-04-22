@@ -12,36 +12,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18.x
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
 
-    - name: Install Dependencies
-      run: |
-        cd code-assist-webUI/code-assist-web
-        npm ci
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-    - name: Build App
-      run: |
-        cd code-assist-webUI/code-assist-web
-        npm run build  # Outputs to ./docs
+      - name: Install Dependencies
+        run: |
+          cd code-assist-webUI/code-assist-web
+          npm ci
 
-    - name: Add .nojekyll
-      run: touch code-assist-webUI/code-assist-web/docs/.nojekyll
+      - name: Check scripts directory
+        run: |
+          cd code-assist-webUI/code-assist-web
+          ls -la ../../scripts
 
-    - name: Verify contents
-      run: |
-        ls -la code-assist-webUI/code-assist-web/docs
+      - name: Build App
+        run: |
+          cd code-assist-webUI/code-assist-web
+          npm run build | tee build.log
 
-    - name: Deploy to gh-pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: code-assist-webUI/code-assist-web/docs
-        publish_branch: gh-pages
-        force_orphan: true
-        commit_message: "Deploy to GitHub Pages"
+      - name: Add .nojekyll
+        run: touch code-assist-webUI/code-assist-web/docs/.nojekyll
+
+      - name: Verify contents
+        run: ls -la code-assist-webUI/code-assist-web/docs
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: code-assist-webUI/code-assist-web/docs
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: "Deploy to GitHub Pages"
