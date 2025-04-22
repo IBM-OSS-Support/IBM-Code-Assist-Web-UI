@@ -33,27 +33,39 @@ jobs:
           cd code-assist-webUI/code-assist-web
           npm ci
 
-      - name: Check scripts directory
+      - name: Run react-scripts build
         run: |
           cd code-assist-webUI/code-assist-web
-          ls -la ../../scripts
+          npm run build --if-present --loglevel verbose || exit 1
+        env:
+          CI: false  # Avoids warnings that can fail the build in CI
 
-      - name: Build App
+      - name: Run custom index generation script
         run: |
           cd code-assist-webUI/code-assist-web
-          npm run build | tee build.log
+          node ../../scripts/generate-index.js
 
-      - name: Add .nojekyll
-        run: touch code-assist-webUI/code-assist-web/docs/.nojekyll
+      - name: Move build files to docs
+        run: |
+          cd code-assist-webUI/code-assist-web
+          rsync -av build/ ../../docs
 
-      - name: Verify contents
-        run: ls -la code-assist-webUI/code-assist-web/docs
+      - name: Clean up build directory
+        run: |
+          cd code-assist-webUI/code-assist-web
+          rm -rf build
+
+      - name: Add .nojekyll file
+        run: touch code-assist-webUI/docs/.nojekyll
+
+      - name: Verify docs directory contents
+        run: ls -la code-assist-webUI/docs
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: code-assist-webUI/code-assist-web/docs
+          publish_dir: code-assist-webUI/docs
           publish_branch: gh-pages
           force_orphan: true
           commit_message: "Deploy to GitHub Pages"
