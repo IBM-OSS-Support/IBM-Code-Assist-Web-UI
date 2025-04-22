@@ -25,7 +25,7 @@ const ModelComparison = () => {
     const [selectedOther, setSelectedOther] = useState<string | null>(null);
     const [compareClicked, setCompareClicked] = useState<boolean>(false);
     const [solidBackgrounds, setSolidBackgrounds] = useState<{ [modelName: string]: boolean }>({});
-    const [selectedQuestions, setSelectedQuestions] = useState<{ [modelName: string]: string }>({});
+    const [selectedQuestions, setSelectedQuestions] = useState<{ [key: string]: string }>({});
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [selectedDates, setSelectedDates] = useState<{ [modelName: string]: string | null }>({});
     const [modelsData, setModelsData] = useState<Model[]>([]);
@@ -625,7 +625,7 @@ const ModelComparison = () => {
                 {compareClicked && selectedGranite && selectedOther && !isLoading ? (
                     <Column sm={4} md={8} lg={16}>
                         <div style={{ display: "flex", justifyContent: "space-around", marginTop: "20px" }}>
-                            {[selectedGranite, selectedOther].map((modelName) => {
+                            {[selectedGranite, selectedOther].map((modelName, index) => {
                                 console.log("1.modelName:::>>", modelName);
 
                                 const model = getModelDetails(modelName);
@@ -663,18 +663,32 @@ const ModelComparison = () => {
                                 }
 
                                 if (!model) return null;
-                                const questionNumbers = ["All"];
-                                const selectedQuestion = model.model ? selectedQuestions[model.model.name] || "All" : "All";
+                                const resultKey = `${model?.model?.name}-${index}`;
+                                const questionKey = resultKey;
+                                const selectedFileName = selectedResults[resultKey];
+                                const selectedQuestion = selectedQuestions[questionKey] || "All";
 
-                                if (model && model.model) {
-                                    questionNumbers.push(...model.model.prompt.map((_, index) => `Question ${index + 1}`));
+                                const questionOptions: string[] = ["All"];
+
+                                if (selectedFileName) {
+                                    const matchingModel = modelsData
+                                      .flatMap(entry => Object.values(entry).flat())
+                                      .find(m => m.name === model?.model?.name && m.file_name === selectedFileName);
+                                  
+                                    if (matchingModel?.prompt) {
+                                      matchingModel.prompt.forEach((prompt: any, idx: number) => {
+                                        const userPrompt = prompt.user.replace(/<\/?(user|assistant)>/g, '').trim();
+                                        const snippet = userPrompt.length > 100 ? userPrompt.slice(0, 100) + '...' : userPrompt;
+                                        questionOptions.push(`Chat ${idx + 1}: ${snippet}`);
+                                      });
+                                    }
                                 }
 
                                 const filteredPrompts = modelsData
                                     .flatMap((entry) => Object.values(entry).flat())
                                     .filter((m) => m.name === model?.model?.name)
                                     .flatMap((m) => {
-                                        const selectedFileName = selectedResults[model?.model?.name ?? ''];
+                                        const selectedFileName = selectedResults[`${model?.model?.name}-${index}`];
                                         if (selectedFileName && m.file_name === selectedFileName) {
                                             // Ensure the selected file's model name matches the current model name
                                             const parsedFile = parseFileName(selectedFileName);
@@ -778,7 +792,7 @@ const ModelComparison = () => {
                                 console.log(`Filtered Prompts:`, filteredPrompts);
 
                                 return (
-                                    <div id={`chat-outter-wrap-${model.model?.name}`} className="chat-outter-wrap" key={model?.model?.name}>
+                                    <div id={`chat-outter-wrap-${model.model?.name}`} className="chat-outter-wrap" key={`${model?.model?.name}-${index}`}>
                                         
                                         {/* { modelScores[selectedGranite] && modelScores[selectedOther] 
                                             ? parseFloat(modelScores[model?.model?.name ?? '']) > parseFloat(modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]) 
@@ -850,54 +864,19 @@ const ModelComparison = () => {
 
                                         <div style={{ margin: "0.5rem 0"}}>
                                             <Grid fullWidth narrow>
-                                                {/* <Column lg={8} md={8} sm={4}>
-                                                    <DatePicker 
-                                                        datePickerType="single"
-                                                        className="question-date-picker"
-                                                        dateFormat="d/m/Y"
-                                                        maxDate={new Date().setDate(new Date().getDate())}
-                                                        value={selectedDates[model?.model?.name ?? ''] ? new Date(selectedDates[model?.model?.name ?? ''] as string) : undefined}
-                                                        // onChange={handleDateChange(model, selectedDates[model.name] ? new Date(selectedDates[model.name] as string) : null)}
-                                                        onChange={(eventOrDates) => {
-                                                            const dateValue = Array.isArray(eventOrDates) ? eventOrDates[0] : eventOrDates;
-                                                            const formattedDate = dateValue 
-                                                                ? new Date(dateValue.getTime() - (dateValue.getTimezoneOffset() * 60000))
-                                                                    .toISOString()
-                                                                    .split('T')[0]
-                                                                : null;
-                                                        
-                                                            const modelName = model?.model?.name ?? 'default';
-                                                            
-                                                            // Update selected date and clear existing result
-                                                            setSelectedDates(prev => ({
-                                                              ...prev,
-                                                              [modelName]: formattedDate
-                                                            }));
-                                                            
-                                                            setSelectedResults(prev => ({
-                                                              ...prev,
-                                                              [modelName]: '' // Clear selected result when date changes
-                                                            }));
-
-                                                          }}
-                                                    >
-                                                        <DatePickerInput
-                                                            id={`date-picker-${model?.model?.name}`}
-                                                            placeholder="dd/mm/yyyy"
-                                                            labelText="Select a Date"
-                                                        />
-                                                    </DatePicker>
-                                                </Column> */}
                                                 <Column lg={8} md={8} sm={4}>
                                                     <Dropdown
-                                                        id={`question-combo-box-${model?.model?.name}`}
+                                                        key={`question-combo-${index}-${modelName}`}
+                                                        id={`question-combo-box-${index}-${model?.model?.name}-${Math.random().toString(36).substr(2, 9)}`}
                                                         className="question-combo-box"
-                                                        items={questionNumbers}
+                                                        items={questionOptions}
                                                         itemToString={(item) => (item ? item : '')}
-                                                        onChange={({ selectedItem }) => setSelectedQuestions((prev) => ({
-                                                            ...prev,
-                                                            [model?.model?.name || 'default_key']: selectedItem as string
-                                                        }))}
+                                                        onChange={({ selectedItem }) => { 
+                                                            setSelectedQuestions((prev) => ({
+                                                                ...prev,
+                                                                [questionKey || 'default_key']: selectedItem as string,
+                                                            }))}
+                                                        }
                                                         selectedItem={selectedQuestion}
                                                         titleText="Select a Question"
                                                         label="Choose a question"
@@ -905,7 +884,8 @@ const ModelComparison = () => {
                                                 </Column>
                                                 <Column lg={8} md={8} sm={4}>
                                                     <ComboBox
-                                                        id={`result-combo-box-${model?.model?.name}`}
+                                                        key={`result-combo-${index}-${modelName}`}
+                                                        id={`result-combo-box-${index}-${model?.model?.name}-${Math.random().toString(36).substr(2, 9)}`}
                                                         className="result-combo-box"
                                                         items={model?.modelJsonFiles || []}
                                                         itemToString={(item) => {
@@ -928,27 +908,26 @@ const ModelComparison = () => {
                                                             return `${parsed.modelName}-${day}-${month}-${year} ${twelveHour}:${minutes}${ampm}`;
                                                         }}
                                                         onChange={({ selectedItem }) => {
-                                                            const currentModelName = model?.model?.name as string;
+                                                            const resultKey = `${model?.model?.name}-${index}`;
                                                             setSelectedResults((prev) => ({
                                                                 ...prev,
-                                                                [currentModelName]: selectedItem as string,
+                                                                [resultKey]: selectedItem as string,
                                                             }));
-
-                                                            // Update filtered prompts based on the selected result
+                                                            
                                                             const selectedFileName = selectedItem as string;
                                                             const filteredPrompts = modelsData
                                                                 .flatMap((entry) => Object.values(entry).flat())
                                                                 .filter((model) => model.file_name === selectedFileName)
                                                                 .flatMap((model) => model.prompt || []);
-
+                                                        
                                                             setFilteredPrompts((prev) => ({
                                                                 ...prev,
-                                                                [model?.model?.name || '']: filteredPrompts,
+                                                                [resultKey]: filteredPrompts, // Make this unique too
                                                             }));
-
-                                                            console.log(`Filtered Prompts for ${model?.model?.name}:`, filteredPrompts);
-                                                        }}
-                                                        selectedItem={selectedResults[model?.model?.name as string] || null}
+                                                        
+                                                            console.log(`Filtered Prompts for ${resultKey}:`, filteredPrompts);
+                                                        }}                                                        
+                                                        selectedItem={selectedResults[`${model?.model?.name}-${index}`] || null}
                                                         titleText="Select a Result"
                                                         placeholder="Choose a result version"
                                                         shouldFilterItem={({ item, inputValue }) =>
@@ -962,19 +941,19 @@ const ModelComparison = () => {
 
                                             
                                             <Grid fullWidth narrow> 
-                                                {(selectedResults[model?.model?.name as string] || model?.modelJsonFiles?.length === 1) && (
+                                                {(selectedResults[`${model?.model?.name}-${index}`] || model?.modelJsonFiles?.length === 1) && (
                                                 <Column lg={16} md={8} sm={4}>
                                                     <Button
                                                         kind="danger--tertiary"
                                                         size="sm"
                                                         onClick={() => {
-                                                            const modelName = model?.model?.name as string;
-                                                            setSelectedQuestions(prev => ({ ...prev, [modelName]: "All" }));
-                                                            setSelectedResults(prev => ({ ...prev, [modelName]: '' }));
+                                                            const compositeKey = `${model?.model?.name}-${index}`;
+                                                            setSelectedQuestions(prev => ({ ...prev, [compositeKey]: "All" }));
+                                                            setSelectedResults(prev => ({ ...prev, [compositeKey]: '' }));
                                                             setSelectedDates(prev => ({ ...prev, [modelName]: null }));
                                                         }}
                                                         disabled={
-                                                            !selectedResults[model?.model?.name as string] &&
+                                                            !selectedResults[`${model?.model?.name}-${index}`] &&
                                                             !selectedDates[model?.model?.name as string]
                                                         }
                                                         style={{ 
@@ -984,8 +963,7 @@ const ModelComparison = () => {
                                                             alignItems: "center",
                                                             justifyContent: "center",
                                                             float: "right",
-                                                            display: !selectedResults[model?.model?.name as string] &&
-                                                            !selectedDates[model?.model?.name as string] ? "none" : "block"
+                                                            display: !selectedResults[`${model?.model?.name}-${index}`] ? "none" : "block"
                                                         }}
                                                     >
                                                         Reset Filter
