@@ -61,24 +61,31 @@ const LogsTable: React.FC = () => {
 
   useEffect(() => {
     const fetchLogFiles = async () => {
-      try {
-        const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
-        const response = await fetch(logsJsonUrl);
-        if (!response.ok) throw new Error("Failed to fetch log files");
-        const files: string[] = await response.json();
-
-        const formattedFiles: LogFile[] = files.map((file) => {
-          const fileNameWithoutLogs = file.replace("logs/", "");
-          const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
-          const date = match ? formatDate(match[1]) : "Unknown Date";
-          return { name: fileNameWithoutLogs, date };
-        });
-
-        setLogFiles(formattedFiles);
-      } catch (error) {
-        console.error("Error fetching log files:", error);
-      }
-    };
+        try {
+          const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
+          const response = await fetch(logsJsonUrl);
+          if (!response.ok) throw new Error("Failed to fetch log files");
+          const files: string[] = await response.json();
+      
+          const formattedFiles: LogFile[] = files.map((file) => {
+            const fileNameWithoutLogs = file.replace("logs/", "");
+            const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
+            const date = match ? formatDate(match[1]) : "Unknown Date";
+            return { name: fileNameWithoutLogs, date };
+          });
+      
+          // Sort by actual date descending (most recent first)
+          formattedFiles.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB.getTime() - dateA.getTime(); // Descending
+          });
+      
+          setLogFiles(formattedFiles);
+        } catch (error) {
+          console.error("Error fetching log files:", error);
+        }
+      };      
 
     fetchLogFiles();
   }, []);
@@ -102,8 +109,6 @@ const LogsTable: React.FC = () => {
       setIsLoading(false); // Hide loading spinner
     }
   };
-  
-  
 
   // Slice data based on current page
   const startIndex = (currentPage - 1) * itemsPerPage;
