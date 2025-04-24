@@ -21,31 +21,16 @@ PLEASE ENSURE SAME MODEL NAME ACROSS ALL PLACES
 ################################################
 """
 
-MODEL_NAME = "claude3.5-sonnet"
-MODEL_TYPE = "NOT ASSIGNED"
-sleep_time = 20
-first_time = True
-TIMINGS = []
-
-
-import pyautogui
-import time
-import os
-import re
-from m2j import generate_json
-from simple_term_menu import TerminalMenu
-import fetch_model_name
-import ollama_server
-
 # ──────────────────────────────────────────────────────────────────────────────
 #                       CONFIGURATION & GLOBALS
 # ──────────────────────────────────────────────────────────────────────────────
 
-MODEL_NAME    = "claude3.5-sonnet"
-MODEL_TYPE    = "NOT ASSIGNED"
-SLEEP_TIME    = 20
-LOG_TIMEOUT   =  60   # seconds
-TIMINGS       = []
+MODEL_NAME = "claude3.5-sonnet"
+MODEL_TYPE = "NOT ASSIGNED"
+sleep_time = 20
+first_time = True
+LOG_TIMEOUT = 60  # seconds
+TIMINGS = []
 
 # ──────────────────────────────────────────────────────────────────────────────
 def wait_for_log_update(server, keyword="total time", timeout=LOG_TIMEOUT):
@@ -102,8 +87,9 @@ def automate_continue_dev(input_text, server=None):
                 try:
                     MODEL_NAME = fetch_model_name.get_model_name()
                     print("🔖 Detected model:", MODEL_NAME)
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"⚠️ Failed to detect model name automatically: {e}")
+                    MODEL_NAME = "granite3.1-dense:8b"  # fallback model name
     else:
         # non-granite: just wait a bit
         time.sleep(SLEEP_TIME)
@@ -172,122 +158,11 @@ def main():
 
     print("\n🎉  All done!")
 
+    # 5) run build command
+    print("\n🛠️  Running `npm run build` in code-assist-web...")
+    os.chdir("code-assist-webUI/code-assist-web")
+    os.system("npm run build")
+
 if __name__ == "__main__":
     main()
 
-
-
-def automate_continue_dev(input_text):
-    global first_time, MODEL_NAME, TIMINGS
-    try:
-        if MODEL_TYPE == 'granite':
-            time.sleep(3)
-            pyautogui.write(input_text, interval=0.1)
-            pyautogui.press('enter')
-            pyautogui.press('enter')
-
-            print("\nFetching server logs for updates...")
-            log = wait_for_log_update(server)
-            print("Returned Log: ", log)
-
-            # Updated regex to be more flexible
-            match = re.search(r'(\d+(?:\.\d+)?)\s*ms', log)
-
-            if match:
-                TIMINGS.append(float(match.group(1)))
-                print("Timings List: ", TIMINGS)
-            else:
-                print("⚠️ Warning: Log received but no timing matched.")
-                print("🔍 Last Log:", log)
-
-            if first_time:
-                MODEL_NAME = fetch_model_name.get_model_name()
-                print("\nGRANITE MODEL NAME: ", MODEL_NAME)
-                first_time = False
-        else:
-            time.sleep(3)
-            pyautogui.write(input_text, interval=0.1)
-            pyautogui.press('enter')
-            pyautogui.press('enter')
-            time.sleep(sleep_time)
-
-    except pyautogui.FailSafeException:
-        print("Fail-safe triggered. Mouse clicked away from the chat box.")
-    except Exception as e:
-        print(f"An error occurred during automation: {e}")
-
-
-def process_input_file(input_file):
-    try:
-        with open(input_file, 'r', encoding='utf-8') as file:
-            for line in file:
-                input_text = line.strip()
-                print("\nEvaluating Prompt:", input_text)
-                print("[INFO]: Please click on the chat box in Continue.dev and stay there!")
-                automate_continue_dev(input_text)
-    except FileNotFoundError:
-        print(f"Error: The file {input_file} was not found.")
-    except IOError as e:
-        print(f"An error occurred while reading the file: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
-
-if __name__ == '__main__':
-    print("HELLOOO")
-    print("######################################################\n\n")
-    print("      Please select a file from the below options:        \n\n")
-    print("######################################################\n\n")
-    options = ["Simple Chat Prompts", "Context Providers", "Exit"]
-    terminal_menu = TerminalMenu(options)
-    selected_index = terminal_menu.show()
-
-    if selected_index == 0:
-        input_file = 'prompts_list.txt'
-    elif selected_index == 1:
-        input_file = 'context_providers.txt'
-    else:
-        print("GOODBYE!")
-        exit(0)
-
-    print("######################################################\n\n")
-    print("      Please select a file from the below options:        \n\n")
-    print("######################################################\n\n")
-    options = ["Granite", "Other Models", "Exit"]
-    terminal_menu = TerminalMenu(options)
-    selected_index = terminal_menu.show()
-
-    if selected_index == 0:
-        MODEL_TYPE = 'granite'
-        print("\nStarting Ollama server...")
-        try:
-            server = ollama_server.OllamaServer()
-            server.start_server()
-        except Exception as e:
-            print(f"Error starting Ollama server: {e}")
-    elif selected_index == 1:
-        MODEL_TYPE = 'others'
-    else:
-        print("GOODBYE!")
-        exit(0)
-
-    print(f"\nExecuting prompts from {input_file}. The selected model type is: {MODEL_TYPE}")
-    print("\n##############################################################################################")
-    print(f"\n[WARNING] Please ensure that the model selected in chat box of Continue.dev is of type {MODEL_TYPE}\n")
-    print("##############################################################################################")
-
-    try:
-        process_input_file(input_file)
-        pyautogui.write("/share", interval=0.08)
-        pyautogui.press('enter')
-        pyautogui.press('enter')
-
-        if TIMINGS:
-            generate_json(MODEL_NAME, TIMINGS)
-            print("🎉 Process completed with timings!")
-        else:
-            print("⚠️ No timings recorded.")
-            print("🎉 Process completed!")
-
-    except Exception as e:
-        print(f"An unexpected error occurred in the main function: {e}")

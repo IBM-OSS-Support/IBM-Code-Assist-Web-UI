@@ -6,6 +6,10 @@
     "gpt-4o/gpt-4o_20250311T204733.json",
     "gpt-4o/gpt-4o_20250311T203629.json"
   ],
+  "granite3.1-dense:8b": [
+    "granite3.1-dense:8b/granite3.1-dense:8b_20250424T215919.json",
+    "granite3.1-dense:8b/granite3.1-dense:8b_20250424T210633.json"
+  ],
   "granite3.1:8b": [
     "granite3.1:8b/granite3.1:8b_20250302T101520.json"
   ],
