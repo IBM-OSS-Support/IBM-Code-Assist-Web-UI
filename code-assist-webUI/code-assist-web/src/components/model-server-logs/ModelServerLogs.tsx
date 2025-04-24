@@ -13,15 +13,22 @@ import {
   Column,
   CodeSnippet,
   Pagination,
-  DatePickerSkeleton,
-  InlineLoading,
+  Loading,
+  Tile,
+  Accordion,
+  AccordionItem,
+  Button,
+  Dropdown,
+  ComboButton,
+  MenuItem,
 } from "@carbon/react";
+import { Download } from "@carbon/icons-react";
 import "./_ModelServerLogs.scss";
-import { Loading } from "@carbon/react";
 
 interface LogFile {
   name: string;
   date: string;
+  rawDate: string;
 }
 
 const headers: { key: keyof LogFile; header: string }[] = [
@@ -37,10 +44,10 @@ const LogsTable: React.FC = () => {
   const [logFiles, setLogFiles] = useState<LogFile[]>([]);
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [logContent, setLogContent] = useState<string | null>(null);
+  const [logSummary, setLogSummary] = useState<Record<string, string>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
@@ -48,94 +55,127 @@ const LogsTable: React.FC = () => {
     const date = new Date(
       `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}T${dateStr.substring(9, 11)}:${dateStr.substring(11, 13)}:${dateStr.substring(13, 15)}`
     );
-    return date.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    }).replace(",", "");
+    return {
+      formatted: date.toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }).replace(",", ""),
+      raw: date.toISOString(),
+    };
+  };
+
+  const extractLogValues = (logText: string) => {
+    const patterns = [
+      "general.basename str",
+      "llm_load_print_meta: general.name",
+    //   "general.size_label str",
+    //   "llm_load_print_meta: model params",
+      "llm_load_print_meta: model size",
+      "ggml_metal_init: found device",
+      "ggml_metal_init: GPU name",
+      "ggml_metal_init: recommendedMaxWorkingSetSize"
+    ];
+  
+    const extracted: Record<string, string> = {};
+  
+    for (const pattern of patterns) {
+      const escapedPattern = pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+      const regex = new RegExp(`${escapedPattern}\\s*[:=]\\s*(.+)`);
+      const match = logText.match(regex);
+      if (match) {
+        extracted[pattern] = match[1].trim();
+      }
+    }
+  
+    return extracted;
   };
 
   useEffect(() => {
     const fetchLogFiles = async () => {
-        try {
-          const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
-          const response = await fetch(logsJsonUrl);
-          if (!response.ok) throw new Error("Failed to fetch log files");
-          const files: string[] = await response.json();
-      
-          const now = new Date();
-      
-          const formattedFiles: { name: string; date: string; rawDate?: Date }[] = files.map((file) => {
-            const fileNameWithoutLogs = file.replace("logs/", "");
-            const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
-      
-            let rawDate;
-            let dateStr = "Unknown Date";
-            if (match) {
-              const parsed = match[1];
-              rawDate = new Date(
-                `${parsed.substring(0, 4)}-${parsed.substring(4, 6)}-${parsed.substring(6, 8)}T${parsed.substring(9, 11)}:${parsed.substring(11, 13)}:${parsed.substring(13, 15)}`
-              );
-              dateStr = rawDate.toLocaleString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true,
-              }).replace(",", "");
-            }
-      
-            return {
-              name: fileNameWithoutLogs,
-              date: dateStr,
-              rawDate,
-            };
-          });
-      
-          // Sort by closest to today's date
-          formattedFiles.sort((a, b) => {
-            const diffA = a.rawDate ? Math.abs(now.getTime() - a.rawDate.getTime()) : Infinity;
-            const diffB = b.rawDate ? Math.abs(now.getTime() - b.rawDate.getTime()) : Infinity;
-            return diffA - diffB;
-          });
-      
-          // Drop rawDate before saving to state
-          setLogFiles(formattedFiles.map(({ name, date }) => ({ name, date })));
-        } catch (error) {
-          console.error("Error fetching log files:", error);
-        }
-      };      
+      try {
+        const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
+        const response = await fetch(logsJsonUrl);
+        if (!response.ok) throw new Error("Failed to fetch log files");
+        const files: string[] = await response.json();
+
+        const formattedFiles: LogFile[] = files.map((file) => {
+          const fileNameWithoutLogs = file.replace("logs/", "");
+          const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
+          const { formatted, raw } = match ? formatDate(match[1]) : { formatted: "Unknown Date", raw: "0" };
+          return { name: fileNameWithoutLogs, date: formatted, rawDate: raw };
+        });
+
+        const sortedFiles = formattedFiles.sort((a, b) =>
+          new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
+        );
+
+        setLogFiles(sortedFiles);
+      } catch (error) {
+        console.error("Error fetching log files:", error);
+      }
+    };
 
     fetchLogFiles();
   }, []);
 
   const fetchLogContent = async (fileName: string) => {
     try {
-      setIsLoading(true); // Show loading spinner
+      setIsLoading(true);
       setSelectedLog(fileName);
-      setIsModalOpen(true); // Open modal immediately with spinner
-  
-      const logFileUrl = `https://raw.githubusercontent.com/IBM-OSS-Support/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/logs/${fileName}`;
+      setIsModalOpen(true);
+
+      const logFileUrl = `${GITHUB_LOG_URL}/${fileName}`;
       const response = await fetch(logFileUrl);
       if (!response.ok) throw new Error("Failed to fetch log content");
       const content = await response.text();
-  
+
       setLogContent(content);
+      const summary = extractLogValues(content);
+      setLogSummary(summary);
     } catch (error) {
       console.error("Error fetching log content:", error);
       setLogContent("⚠️ Failed to load content.");
+      setLogSummary({});
     } finally {
-      setIsLoading(false); // Hide loading spinner
+      setIsLoading(false);
     }
   };
 
-  // Slice data based on current page
+  const downloadLog = (format: "json" | "csv" | "log") => {
+    if (!selectedLog || !logContent) return;
+  
+    let blob: Blob;
+    let filename = selectedLog;
+  
+    if (format === "json") {
+      blob = new Blob([JSON.stringify({ content: logContent }, null, 2)], {
+        type: "application/json",
+      });
+      filename = filename.replace(".log", ".json");
+    } else if (format === "csv") {
+      // Treating the entire log file as a single column in CSV
+      const csvContent = `"log_content"\n"${logContent.replace(/"/g, '""')}"`;
+      blob = new Blob([csvContent], { type: "text/csv" });
+      filename = filename.replace(".log", ".csv");
+    } else {
+      blob = new Blob([logContent], { type: "text/plain" });
+    }
+  
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+  
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedFiles = logFiles.slice(startIndex, endIndex);
@@ -157,13 +197,7 @@ const LogsTable: React.FC = () => {
             }))}
             headers={headers}
           >
-            {({
-              rows,
-              headers,
-              getHeaderProps,
-              getRowProps,
-              getTableProps,
-            }) => (
+            {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
               <TableContainer>
                 <Table {...getTableProps()}>
                   <TableHead>
@@ -181,15 +215,10 @@ const LogsTable: React.FC = () => {
                         {row.cells.map((cell) => (
                           <TableCell
                             key={cell.id}
-                            onClick={() =>
-                              cell.info.header === "name" &&
-                              fetchLogContent(cell.value)
-                            }
+                            onClick={() => fetchLogContent(row.cells.find(cell => cell.info.header === "name")?.value)}
                             style={{
-                              cursor:
-                                cell.info.header === "name" ? "pointer" : "default",
-                              color:
-                                cell.info.header === "name" ? "#e4e4e4" : "inherit",
+                              cursor: cell.info.header === "name" ? "pointer" : "default",
+                              color: cell.info.header === "name" ? "#e4e4e4" : "inherit",
                               height: "4.7rem",
                             }}
                           >
@@ -197,10 +226,7 @@ const LogsTable: React.FC = () => {
                               <p style={{ height: "1.3rem" }}></p>
                               <span>{cell.value}</span>
                               {cell.info.header === "name" && cell.value && (
-                                <p>
-                                  Click on the Log File Name ({cell.value}) to view its
-                                  content.
-                                </p>
+                                <p>Click on the Log File Name ({cell.value}) to view its content.</p>
                               )}
                             </div>
                           </TableCell>
@@ -225,29 +251,62 @@ const LogsTable: React.FC = () => {
           />
         </Column>
       </Grid>
-
       {isLoading ? (
-            <div className="loader-wrap">
-                <Loading />
-            </div>
+          <div className="loader-wrap" style={{ padding: "1rem" }}>
+            <Loading />
+          </div>
         ) : (
-            <Modal
-                open={isModalOpen}
-                modalHeading={`Log Content: ${selectedLog}`}
-                passiveModal
-                onRequestClose={() => setIsModalOpen(false)}
-                size="md"
-            >
-            
-                    <CodeSnippet
-                    key={`${selectedLog}-${Date.now()}`}
-                    type="multi"
-                    feedback="Copied to clipboard"
-                    >
-                    {logContent || "No content available"}
-                    </CodeSnippet>
-            </Modal>
-        )}
+                <Modal
+                    open={isModalOpen}
+                    modalHeading={`Log Content: ${selectedLog}`}
+                    passiveModal
+                    onRequestClose={() => setIsModalOpen(false)}
+                    size="lg"
+                >
+                    
+                    <>
+                        {Object.keys(logSummary).length > 0 && (
+                            <div>
+                                <div style={{ margin: "1rem 0", display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+                                    <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("json")}>Download JSON</Button>{" "}
+                                    <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("csv")}>Download CSV</Button>{" "}
+                                    <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("log")}>Download .log</Button>
+                                </div>
+                                <Tile className="log-summary-tile">
+                                    <h4>Log Summary</h4>
+                                    <div className="log-summary-content">
+                                        {Object.entries(logSummary).map(([key, value]) => {
+                                            const labelMap: Record<string, string> = {
+                                                "general.basename str": "Basename:",
+                                                "llm_load_print_meta: general.name": "General Name:",
+                                                "llm_load_print_meta: model size": "Model Size:",
+                                                "ggml_metal_init: found device": "User Device:",
+                                                "ggml_metal_init: GPU name": "GPU Name:",
+                                                "ggml_metal_init: recommendedMaxWorkingSetSize": "Recommended GPU Memory:"
+                                            };
+                                            return (
+                                                <p key={key} style={{ marginBottom: "0.5rem" }}>
+                                                    <strong style={{ color: "#08BDBA" }}>{labelMap[key] || key}</strong>{" "}
+                                                    <span style={{ color: "#F1C21B" }}>{value}</span>
+                                                </p>
+                                            );
+                                        })}
+                                    </div>
+                                </Tile>
+                            </div>
+                        )}
+
+                        <CodeSnippet
+                        key={`${selectedLog}-${Date.now()}`}
+                        type="multi"
+                        feedback="Copied to clipboard"
+                        className="log-content-snippet"
+                        >
+                        {logContent || "No content available"}
+                        </CodeSnippet>
+                    </>
+                </Modal>
+            )}
     </div>
   );
 };

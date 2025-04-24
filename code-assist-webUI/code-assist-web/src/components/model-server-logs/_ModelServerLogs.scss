@@ -39,11 +39,15 @@
     }
     .cds--snippet--multi {
         background: #000011;
+        height: 100%;
         max-inline-size: 100%;
         &.cds--snippet--has-right-overflow {
           &:after {
             background-image: linear-gradient(to right, #0000, #000000);
           }
+        }
+        .cds--snippet-container {
+            min-height: 100% !important;
         }
     }
 
@@ -64,4 +68,35 @@
             justify-content: center;
         }
     }
+    .cds--modal {
+        &.is-visible {
+            .cds--modal-container {
+                min-height: 55%;
+            }
+        }
+    }
+    .log-summary-tile {
+        > p {
+            min-width: 45%;
+        }
+    }
+    .log-summary-tile {
+        margin-bottom: 1.5rem;
+        > h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        .log-summary-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+    
+            > p {
+                min-width: 45%;
+            }
+        }
+    } 
 }
