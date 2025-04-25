@@ -373,24 +373,23 @@ const ModelComparison = () => {
 
     // To handle auto-selection of single results
     useEffect(() => {
-        [selectedGranite, selectedOther].forEach(modelName => {
+        [selectedGranite, selectedOther].forEach((modelName, index) => {
           if (!modelName) return;
-          
+      
           const { modelJsonFiles } = getModelDetails(modelName);
-          const hasExistingSelection = !!selectedResults[modelName];
-          
-          // Only auto-select if:
-          // - No existing selection
-          // - Not in reset state (date is null)
-          // - Files available
-          if (!hasExistingSelection && selectedDates[modelName] && modelJsonFiles?.length === 1) {
+          const hasExistingSelection = !!selectedResults[`${modelName}-${index}`];
+      
+          if (!hasExistingSelection && modelJsonFiles && modelJsonFiles.length > 0) {
+            const latestFile = modelJsonFiles[modelJsonFiles.length - 1];
+      
             setSelectedResults(prev => ({
               ...prev,
-              [modelName]: modelJsonFiles[0]
+              [`${modelName}-${index}`]: latestFile
             }));
           }
         });
-      }, [availableFiles, selectedDates]);
+      }, [selectedGranite, selectedOther, selectedDates]);
+      
     
     console.log("availableFiles", availableFiles, "modelsData:", modelsData);
     console.log("Potentially problematic models:", modelsData.filter(model => !model.name));
@@ -791,6 +790,20 @@ const ModelComparison = () => {
                                 console.log(`Prompts:`, model?.model?.prompt);
                                 console.log(`Filtered Prompts:`, filteredPrompts);
 
+                                const formatMillisecondsToTime = (ms: number): string => {
+                                    const totalSeconds = Math.floor(ms / 1000);
+                                    const hours = Math.floor(totalSeconds / 3600);
+                                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                                    const seconds = totalSeconds % 60;
+                                  
+                                    const parts = [];
+                                    if (hours > 0) parts.push(`${hours} hr`);
+                                    if (minutes > 0) parts.push(`${minutes} min`);
+                                    if (seconds > 0 || parts.length === 0) parts.push(`${seconds} sec`);
+                                  
+                                    return parts.join(' ');
+                                };
+                                  
                                 return (
                                     <div id={`chat-outter-wrap-${model.model?.name}`} className="chat-outter-wrap" key={`${model?.model?.name}-${index}`}>
                                         
@@ -832,7 +845,7 @@ const ModelComparison = () => {
                                         <div className="time-taken-wrap">
                                             <p>
                                                 <strong>
-                                                    Response Time{" "} <span><Help width={"0.75rem"} height={"0.75rem"} /></span>
+                                                    Total Response Time{" "} <span><Help width={"0.75rem"} height={"0.75rem"} /></span>
                                                     :
                                                 </strong>
                                                 <span
@@ -847,7 +860,7 @@ const ModelComparison = () => {
                                                     ? (
                                                         fastestTime !== null && (
                                                             <>
-                                                                <span>{(model.model.total_time / 1000).toFixed(2)}s </span>
+                                                                <span>{formatMillisecondsToTime(Number(model.model.total_time))}</span>
                                                                 {fastestTime === model.model.total_time && (
                                                                     <span className="flash-icon">
                                                                         <FlashFilled size={14} color="#facc15" strokeWidth={2} />
@@ -864,24 +877,6 @@ const ModelComparison = () => {
 
                                         <div style={{ margin: "0.5rem 0"}}>
                                             <Grid fullWidth narrow>
-                                                <Column lg={8} md={8} sm={4}>
-                                                    <Dropdown
-                                                        key={`question-combo-${index}-${modelName}`}
-                                                        id={`question-combo-box-${index}-${model?.model?.name}-${Math.random().toString(36).substr(2, 9)}`}
-                                                        className="question-combo-box"
-                                                        items={questionOptions}
-                                                        itemToString={(item) => (item ? item : '')}
-                                                        onChange={({ selectedItem }) => { 
-                                                            setSelectedQuestions((prev) => ({
-                                                                ...prev,
-                                                                [questionKey || 'default_key']: selectedItem as string,
-                                                            }))}
-                                                        }
-                                                        selectedItem={selectedQuestion}
-                                                        titleText="Select a Question"
-                                                        label="Choose a question"
-                                                    />
-                                                </Column>
                                                 <Column lg={8} md={8} sm={4}>
                                                     <ComboBox
                                                         key={`result-combo-${index}-${modelName}`}
@@ -935,7 +930,24 @@ const ModelComparison = () => {
                                                         }
                                                         disabled={!model?.modelJsonFiles?.length}
                                                     />
-                                                    {/* <p id="result-warn-message" style={{ display: "block", color: "red", margin: "0.4rem 0", fontSize: "0.75rem" }}>Please select a result from dropdown.</p> */}
+                                                </Column>
+                                                <Column lg={8} md={8} sm={4}>
+                                                    <Dropdown
+                                                        key={`question-combo-${index}-${modelName}`}
+                                                        id={`question-combo-box-${index}-${model?.model?.name}-${Math.random().toString(36).substr(2, 9)}`}
+                                                        className="question-combo-box"
+                                                        items={questionOptions}
+                                                        itemToString={(item) => (item ? item : '')}
+                                                        onChange={({ selectedItem }) => { 
+                                                            setSelectedQuestions((prev) => ({
+                                                                ...prev,
+                                                                [questionKey || 'default_key']: selectedItem as string,
+                                                            }))}
+                                                        }
+                                                        selectedItem={selectedQuestion}
+                                                        titleText="Select a Question"
+                                                        label="Choose a question"
+                                                    />
                                                 </Column>
                                             </Grid>
 
