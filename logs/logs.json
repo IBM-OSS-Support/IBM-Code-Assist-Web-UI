@@ -1,4 +1,5 @@
 [
+  "logs/ollama_server_20250425_115039.log",
   "logs/ollama_server_20250425_093131.log",
   "logs/ollama_server_20250424_222026.log",
   "logs/ollama_server_20250424_215653.log",
@@ -14,6 +15,5 @@
   "logs/ollama_server_20250403_214658.log",
   "logs/ollama_server_20250403_210419.log",
   "logs/ollama_server_20250403_205130.log",
-  "logs/ollama_server_20250403_204454.log",
-  "logs/granite3.2_2b_log_20250422_163604.log"
+  "logs/ollama_server_20250403_204454.log"
 ]

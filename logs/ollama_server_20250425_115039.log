@@ -1,0 +1,743 @@
+2025/04/25 11:50:42 routes.go:1232: INFO server config env="map[HTTPS_PROXY: HTTP_PROXY: NO_PROXY: OLLAMA_CONTEXT_LENGTH:2048 OLLAMA_DEBUG:true OLLAMA_FLASH_ATTENTION:false OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:0 OLLAMA_MAX_QUEUE:512 OLLAMA_MODELS:/Users/sachinsuresh/.ollama/models OLLAMA_MULTIUSER_CACHE:false OLLAMA_NEW_ENGINE:false OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NUM_PARALLEL:0 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_SCHED_SPREAD:false http_proxy: https_proxy: no_proxy:]"
+time=2025-04-25T11:50:42.842+05:30 level=INFO source=images.go:458 msg="total blobs: 29"
+time=2025-04-25T11:50:42.843+05:30 level=INFO source=images.go:465 msg="total unused blobs removed: 0"
+time=2025-04-25T11:50:42.844+05:30 level=INFO source=routes.go:1299 msg="Listening on 127.0.0.1:11434 (version 0.6.6)"
+time=2025-04-25T11:50:42.844+05:30 level=DEBUG source=sched.go:107 msg="starting llm scheduler"
+time=2025-04-25T11:50:42.897+05:30 level=INFO source=types.go:130 msg="inference compute" id=0 library=metal variant="" compute="" driver=0.0 name="" total="21.3 GiB" available="21.3 GiB"
+time=2025-04-25T11:50:59.422+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:50:59.423+05:30 level=DEBUG source=sched.go:183 msg="updating default concurrency" OLLAMA_MAX_LOADED_MODELS=3 gpu_count=1
+time=2025-04-25T11:50:59.427+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:50:59.432+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:50:59.432+05:30 level=DEBUG source=sched.go:226 msg="loading first model" model=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa
+time=2025-04-25T11:50:59.433+05:30 level=DEBUG source=memory.go:108 msg=evaluating library=metal gpu_count=1 available="[21.3 GiB]"
+time=2025-04-25T11:50:59.433+05:30 level=WARN source=ggml.go:152 msg="key not found" key=llama.vision.block_count default=0
+time=2025-04-25T11:50:59.433+05:30 level=WARN source=ggml.go:152 msg="key not found" key=llama.attention.key_length default=128
+time=2025-04-25T11:50:59.433+05:30 level=WARN source=ggml.go:152 msg="key not found" key=llama.attention.value_length default=128
+time=2025-04-25T11:50:59.434+05:30 level=INFO source=sched.go:722 msg="new model will fit in available VRAM in single GPU, loading" model=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa gpu=0 parallel=4 available=22906503168 required="11.6 GiB"
+time=2025-04-25T11:50:59.434+05:30 level=INFO source=server.go:105 msg="system memory" total="32.0 GiB" free="11.2 GiB" free_swap="0 B"
+time=2025-04-25T11:50:59.434+05:30 level=DEBUG source=memory.go:108 msg=evaluating library=metal gpu_count=1 available="[21.3 GiB]"
+time=2025-04-25T11:50:59.434+05:30 level=WARN source=ggml.go:152 msg="key not found" key=llama.vision.block_count default=0
+time=2025-04-25T11:50:59.434+05:30 level=WARN source=ggml.go:152 msg="key not found" key=llama.attention.key_length default=128
+time=2025-04-25T11:50:59.434+05:30 level=WARN source=ggml.go:152 msg="key not found" key=llama.attention.value_length default=128
+time=2025-04-25T11:50:59.434+05:30 level=INFO source=server.go:138 msg=offload library=metal layers.requested=-1 layers.model=37 layers.offload=37 layers.split="" memory.available="[21.3 GiB]" memory.gpu_overhead="0 B" memory.required.full="11.6 GiB" memory.required.partial="11.6 GiB" memory.required.kv="4.5 GiB" memory.required.allocations="[11.6 GiB]" memory.weights.total="4.3 GiB" memory.weights.repeating="4.1 GiB" memory.weights.nonrepeating="157.5 MiB" memory.graph.full="2.1 GiB" memory.graph.partial="2.1 GiB"
+time=2025-04-25T11:50:59.434+05:30 level=DEBUG source=server.go:262 msg="compatible gpu libraries" compatible=[]
+llama_model_load_from_file_impl: using device Metal (Apple M1 Pro) - 21845 MiB free
+llama_model_loader: loaded meta data with 33 key-value pairs and 578 tensors from /Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = llama
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Granite 8b Code Instruct 128k
+llama_model_loader: - kv   3:                           general.finetune str              = code-instruct-128k
+llama_model_loader: - kv   4:                           general.basename str              = granite
+llama_model_loader: - kv   5:                         general.size_label str              = 8B
+llama_model_loader: - kv   6:                            general.license str              = apache-2.0
+llama_model_loader: - kv   7:                               general.tags arr[str,3]       = ["code", "granite", "text-generation"]
+llama_model_loader: - kv   8:                           general.datasets arr[str,9]       = ["bigcode/commitpackft", "TIGER-Lab/M...
+llama_model_loader: - kv   9:                          llama.block_count u32              = 36
+llama_model_loader: - kv  10:                       llama.context_length u32              = 128000
+llama_model_loader: - kv  11:                     llama.embedding_length u32              = 4096
+llama_model_loader: - kv  12:                  llama.feed_forward_length u32              = 14336
+llama_model_loader: - kv  13:                 llama.attention.head_count u32              = 32
+llama_model_loader: - kv  14:              llama.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  15:                       llama.rope.freq_base f32              = 10000000.000000
+llama_model_loader: - kv  16:     llama.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  17:                          general.file_type u32              = 2
+llama_model_loader: - kv  18:                           llama.vocab_size u32              = 49152
+llama_model_loader: - kv  19:                 llama.rope.dimension_count u32              = 128
+llama_model_loader: - kv  20:            tokenizer.ggml.add_space_prefix bool             = false
+llama_model_loader: - kv  21:               tokenizer.ggml.add_bos_token bool             = false
+llama_model_loader: - kv  22:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  23:                         tokenizer.ggml.pre str              = refact
+llama_model_loader: - kv  24:                      tokenizer.ggml.tokens arr[str,49152]   = ["<|endoftext|>", "<fim_prefix>", "<f...
+llama_model_loader: - kv  25:                  tokenizer.ggml.token_type arr[i32,49152]   = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, ...
+llama_model_loader: - kv  26:                      tokenizer.ggml.merges arr[str,48891]   = ["Ġ Ġ", "ĠĠ ĠĠ", "ĠĠĠĠ ĠĠ...
+llama_model_loader: - kv  27:                tokenizer.ggml.bos_token_id u32              = 0
+llama_model_loader: - kv  28:                tokenizer.ggml.eos_token_id u32              = 0
+llama_model_loader: - kv  29:            tokenizer.ggml.unknown_token_id u32              = 0
+llama_model_loader: - kv  30:            tokenizer.ggml.padding_token_id u32              = 0
+llama_model_loader: - kv  31:                    tokenizer.chat_template str              = {% for message in messages %}\n{% if m...
+llama_model_loader: - kv  32:               general.quantization_version u32              = 2
+llama_model_loader: - type  f32:  325 tensors
+llama_model_loader: - type q4_0:  252 tensors
+llama_model_loader: - type q6_K:    1 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = Q4_0
+print_info: file size   = 4.27 GiB (4.56 BPW) 
+init_tokenizer: initializing tokenizer for type 2
+load: control token:      6 '<gh_stars>' is not marked as EOG
+load: control token:      3 '<fim_suffix>' is not marked as EOG
+load: control token:      1 '<fim_prefix>' is not marked as EOG
+load: control token:      9 '<issue_closed>' is not marked as EOG
+load: control token:     13 '<jupyter_output>' is not marked as EOG
+load: control token:      7 '<issue_start>' is not marked as EOG
+load: control token:      5 '<filename>' is not marked as EOG
+load: control token:     18 '<reponame>' is not marked as EOG
+load: control token:      2 '<fim_middle>' is not marked as EOG
+load: control token:     15 '<commit_before>' is not marked as EOG
+load: control token:     17 '<commit_after>' is not marked as EOG
+load: control token:     14 '<empty_output>' is not marked as EOG
+load: control token:     11 '<jupyter_text>' is not marked as EOG
+load: control token:      4 '<fim_pad>' is not marked as EOG
+load: control token:      8 '<issue_comment>' is not marked as EOG
+load: control token:     12 '<jupyter_code>' is not marked as EOG
+load: control token:     10 '<jupyter_start>' is not marked as EOG
+load: control token:     16 '<commit_msg>' is not marked as EOG
+load: special tokens cache size = 19
+load: token to piece cache size = 0.2826 MB
+print_info: arch             = llama
+print_info: vocab_only       = 1
+print_info: model type       = ?B
+print_info: model params     = 8.05 B
+print_info: general.name     = Granite 8b Code Instruct 128k
+print_info: vocab type       = BPE
+print_info: n_vocab          = 49152
+print_info: n_merges         = 48891
+print_info: BOS token        = 0 '<|endoftext|>'
+print_info: EOS token        = 0 '<|endoftext|>'
+print_info: EOT token        = 0 '<|endoftext|>'
+print_info: UNK token        = 0 '<|endoftext|>'
+print_info: PAD token        = 0 '<|endoftext|>'
+print_info: LF token         = 203 'Ċ'
+print_info: EOG token        = 0 '<|endoftext|>'
+print_info: max token length = 512
+llama_model_load: vocab only - skipping tensors
+time=2025-04-25T11:50:59.495+05:30 level=INFO source=server.go:405 msg="starting llama server" cmd="/Applications/Ollama.app/Contents/Resources/ollama runner --model /Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa --ctx-size 32768 --batch-size 512 --n-gpu-layers 37 --verbose --threads 8 --parallel 4 --port 62161"
+time=2025-04-25T11:50:59.495+05:30 level=DEBUG source=server.go:423 msg=subprocess environment="[PATH=/Users/sachinsuresh/Documents/IBM-Code-Assist-Web-UI/path/to/venv/bin:/Users/sachinsuresh/.nvm/versions/node/v22.13.0/bin:/Library/Java/JavaVirtualMachines/jdk1.8.0_311.jdk/Contents/Home/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/podman/bin:/Users/sachinsuresh/.nvm/versions/node/v22.13.0/bin:/Library/Java/JavaVirtualMachines/jdk1.8.0_311.jdk/Contents/Home/bin:/Users/sachinsuresh/.local/bin:/Users/sachinsuresh/.vscode/extensions/ms-python.debugpy-2025.6.0-darwin-arm64/bundled/scripts/noConfigScripts:/Users/sachinsuresh/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand:/Users/sachinsuresh/.local/bin:/Users/sachinsuresh/.local/bin DYLD_LIBRARY_PATH=/Applications/Ollama.app/Contents/Resources]"
+time=2025-04-25T11:50:59.497+05:30 level=INFO source=sched.go:451 msg="loaded runners" count=1
+time=2025-04-25T11:50:59.497+05:30 level=INFO source=server.go:580 msg="waiting for llama runner to start responding"
+time=2025-04-25T11:50:59.498+05:30 level=INFO source=server.go:614 msg="waiting for server to become available" status="llm server error"
+time=2025-04-25T11:50:59.515+05:30 level=INFO source=runner.go:853 msg="starting go runner"
+time=2025-04-25T11:50:59.515+05:30 level=DEBUG source=ggml.go:99 msg="ggml backend load all from path" path=/Applications/Ollama.app/Contents/Resources
+time=2025-04-25T11:50:59.518+05:30 level=INFO source=ggml.go:109 msg=system Metal.0.EMBED_LIBRARY=1 CPU.0.NEON=1 CPU.0.ARM_FMA=1 CPU.0.FP16_VA=1 CPU.0.DOTPROD=1 CPU.0.LLAMAFILE=1 CPU.0.ACCELERATE=1 compiler=cgo(clang)
+time=2025-04-25T11:50:59.519+05:30 level=INFO source=runner.go:913 msg="Server listening on 127.0.0.1:62161"
+llama_model_load_from_file_impl: using device Metal (Apple M1 Pro) - 21845 MiB free
+llama_model_loader: loaded meta data with 33 key-value pairs and 578 tensors from /Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = llama
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Granite 8b Code Instruct 128k
+llama_model_loader: - kv   3:                           general.finetune str              = code-instruct-128k
+llama_model_loader: - kv   4:                           general.basename str              = granite
+llama_model_loader: - kv   5:                         general.size_label str              = 8B
+llama_model_loader: - kv   6:                            general.license str              = apache-2.0
+llama_model_loader: - kv   7:                               general.tags arr[str,3]       = ["code", "granite", "text-generation"]
+llama_model_loader: - kv   8:                           general.datasets arr[str,9]       = ["bigcode/commitpackft", "TIGER-Lab/M...
+llama_model_loader: - kv   9:                          llama.block_count u32              = 36
+llama_model_loader: - kv  10:                       llama.context_length u32              = 128000
+llama_model_loader: - kv  11:                     llama.embedding_length u32              = 4096
+llama_model_loader: - kv  12:                  llama.feed_forward_length u32              = 14336
+llama_model_loader: - kv  13:                 llama.attention.head_count u32              = 32
+llama_model_loader: - kv  14:              llama.attention.head_count_kv u32              = 8
+llama_model_loader: - kv  15:                       llama.rope.freq_base f32              = 10000000.000000
+llama_model_loader: - kv  16:     llama.attention.layer_norm_rms_epsilon f32              = 0.000010
+llama_model_loader: - kv  17:                          general.file_type u32              = 2
+llama_model_loader: - kv  18:                           llama.vocab_size u32              = 49152
+llama_model_loader: - kv  19:                 llama.rope.dimension_count u32              = 128
+llama_model_loader: - kv  20:            tokenizer.ggml.add_space_prefix bool             = false
+llama_model_loader: - kv  21:               tokenizer.ggml.add_bos_token bool             = false
+llama_model_loader: - kv  22:                       tokenizer.ggml.model str              = gpt2
+llama_model_loader: - kv  23:                         tokenizer.ggml.pre str              = refact
+llama_model_loader: - kv  24:                      tokenizer.ggml.tokens arr[str,49152]   = ["<|endoftext|>", "<fim_prefix>", "<f...
+llama_model_loader: - kv  25:                  tokenizer.ggml.token_type arr[i32,49152]   = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, ...
+llama_model_loader: - kv  26:                      tokenizer.ggml.merges arr[str,48891]   = ["Ġ Ġ", "ĠĠ ĠĠ", "ĠĠĠĠ ĠĠ...
+llama_model_loader: - kv  27:                tokenizer.ggml.bos_token_id u32              = 0
+llama_model_loader: - kv  28:                tokenizer.ggml.eos_token_id u32              = 0
+llama_model_loader: - kv  29:            tokenizer.ggml.unknown_token_id u32              = 0
+llama_model_loader: - kv  30:            tokenizer.ggml.padding_token_id u32              = 0
+llama_model_loader: - kv  31:                    tokenizer.chat_template str              = {% for message in messages %}\n{% if m...
+llama_model_loader: - kv  32:               general.quantization_version u32              = 2
+llama_model_loader: - type  f32:  325 tensors
+llama_model_loader: - type q4_0:  252 tensors
+llama_model_loader: - type q6_K:    1 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = Q4_0
+print_info: file size   = 4.27 GiB (4.56 BPW) 
+init_tokenizer: initializing tokenizer for type 2
+load: control token:      6 '<gh_stars>' is not marked as EOG
+load: control token:      3 '<fim_suffix>' is not marked as EOG
+load: control token:      1 '<fim_prefix>' is not marked as EOG
+load: control token:      9 '<issue_closed>' is not marked as EOG
+load: control token:     13 '<jupyter_output>' is not marked as EOG
+load: control token:      7 '<issue_start>' is not marked as EOG
+load: control token:      5 '<filename>' is not marked as EOG
+load: control token:     18 '<reponame>' is not marked as EOG
+load: control token:      2 '<fim_middle>' is not marked as EOG
+load: control token:     15 '<commit_before>' is not marked as EOG
+load: control token:     17 '<commit_after>' is not marked as EOG
+load: control token:     14 '<empty_output>' is not marked as EOG
+load: control token:     11 '<jupyter_text>' is not marked as EOG
+load: control token:      4 '<fim_pad>' is not marked as EOG
+load: control token:      8 '<issue_comment>' is not marked as EOG
+load: control token:     12 '<jupyter_code>' is not marked as EOG
+load: control token:     10 '<jupyter_start>' is not marked as EOG
+load: control token:     16 '<commit_msg>' is not marked as EOG
+load: special tokens cache size = 19
+load: token to piece cache size = 0.2826 MB
+print_info: arch             = llama
+print_info: vocab_only       = 0
+print_info: n_ctx_train      = 128000
+print_info: n_embd           = 4096
+print_info: n_layer          = 36
+print_info: n_head           = 32
+print_info: n_head_kv        = 8
+print_info: n_rot            = 128
+print_info: n_swa            = 0
+print_info: n_swa_pattern    = 1
+print_info: n_embd_head_k    = 128
+print_info: n_embd_head_v    = 128
+print_info: n_gqa            = 4
+print_info: n_embd_k_gqa     = 1024
+print_info: n_embd_v_gqa     = 1024
+print_info: f_norm_eps       = 0.0e+00
+print_info: f_norm_rms_eps   = 1.0e-05
+print_info: f_clamp_kqv      = 0.0e+00
+print_info: f_max_alibi_bias = 0.0e+00
+print_info: f_logit_scale    = 0.0e+00
+print_info: f_attn_scale     = 0.0e+00
+print_info: n_ff             = 14336
+print_info: n_expert         = 0
+print_info: n_expert_used    = 0
+print_info: causal attn      = 1
+print_info: pooling type     = 0
+print_info: rope type        = 0
+print_info: rope scaling     = linear
+print_info: freq_base_train  = 10000000.0
+print_info: freq_scale_train = 1
+print_info: n_ctx_orig_yarn  = 128000
+print_info: rope_finetuned   = unknown
+print_info: ssm_d_conv       = 0
+print_info: ssm_d_inner      = 0
+print_info: ssm_d_state      = 0
+print_info: ssm_dt_rank      = 0
+print_info: ssm_dt_b_c_rms   = 0
+print_info: model type       = 8B
+print_info: model params     = 8.05 B
+print_info: general.name     = Granite 8b Code Instruct 128k
+print_info: vocab type       = BPE
+print_info: n_vocab          = 49152
+print_info: n_merges         = 48891
+print_info: BOS token        = 0 '<|endoftext|>'
+print_info: EOS token        = 0 '<|endoftext|>'
+print_info: EOT token        = 0 '<|endoftext|>'
+print_info: UNK token        = 0 '<|endoftext|>'
+print_info: PAD token        = 0 '<|endoftext|>'
+print_info: LF token         = 203 'Ċ'
+print_info: EOG token        = 0 '<|endoftext|>'
+print_info: max token length = 512
+load_tensors: loading model tensors, this can take a while... (mmap = true)
+load_tensors: layer   0 assigned to device Metal, is_swa = 0
+load_tensors: layer   1 assigned to device Metal, is_swa = 0
+load_tensors: layer   2 assigned to device Metal, is_swa = 0
+load_tensors: layer   3 assigned to device Metal, is_swa = 0
+load_tensors: layer   4 assigned to device Metal, is_swa = 0
+load_tensors: layer   5 assigned to device Metal, is_swa = 0
+load_tensors: layer   6 assigned to device Metal, is_swa = 0
+load_tensors: layer   7 assigned to device Metal, is_swa = 0
+load_tensors: layer   8 assigned to device Metal, is_swa = 0
+load_tensors: layer   9 assigned to device Metal, is_swa = 0
+load_tensors: layer  10 assigned to device Metal, is_swa = 0
+load_tensors: layer  11 assigned to device Metal, is_swa = 0
+load_tensors: layer  12 assigned to device Metal, is_swa = 0
+load_tensors: layer  13 assigned to device Metal, is_swa = 0
+load_tensors: layer  14 assigned to device Metal, is_swa = 0
+load_tensors: layer  15 assigned to device Metal, is_swa = 0
+load_tensors: layer  16 assigned to device Metal, is_swa = 0
+load_tensors: layer  17 assigned to device Metal, is_swa = 0
+load_tensors: layer  18 assigned to device Metal, is_swa = 0
+load_tensors: layer  19 assigned to device Metal, is_swa = 0
+load_tensors: layer  20 assigned to device Metal, is_swa = 0
+load_tensors: layer  21 assigned to device Metal, is_swa = 0
+load_tensors: layer  22 assigned to device Metal, is_swa = 0
+load_tensors: layer  23 assigned to device Metal, is_swa = 0
+load_tensors: layer  24 assigned to device Metal, is_swa = 0
+load_tensors: layer  25 assigned to device Metal, is_swa = 0
+load_tensors: layer  26 assigned to device Metal, is_swa = 0
+load_tensors: layer  27 assigned to device Metal, is_swa = 0
+load_tensors: layer  28 assigned to device Metal, is_swa = 0
+load_tensors: layer  29 assigned to device Metal, is_swa = 0
+load_tensors: layer  30 assigned to device Metal, is_swa = 0
+load_tensors: layer  31 assigned to device Metal, is_swa = 0
+load_tensors: layer  32 assigned to device Metal, is_swa = 0
+load_tensors: layer  33 assigned to device Metal, is_swa = 0
+load_tensors: layer  34 assigned to device Metal, is_swa = 0
+load_tensors: layer  35 assigned to device Metal, is_swa = 0
+load_tensors: layer  36 assigned to device Metal, is_swa = 0
+ggml_backend_metal_log_allocated_size: allocated buffer, size =  4376.56 MiB, ( 4376.62 / 21845.34)
+load_tensors: offloading 36 repeating layers to GPU
+load_tensors: offloading output layer to GPU
+load_tensors: offloaded 37/37 layers to GPU
+load_tensors:   CPU_Mapped model buffer size =   157.50 MiB
+load_tensors: Metal_Mapped model buffer size =  4376.56 MiB
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 4
+llama_context: n_ctx         = 32768
+llama_context: n_ctx_per_seq = 8192
+llama_context: n_batch       = 2048
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = 0
+llama_context: freq_base     = 10000000.0
+llama_context: freq_scale    = 1
+llama_context: n_ctx_per_seq (8192) < n_ctx_train (128000) -- the full capacity of the model will not be utilized
+ggml_metal_init: allocating
+ggml_metal_init: found device: Apple M1 Pro
+ggml_metal_init: picking default device: Apple M1 Pro
+ggml_metal_load_library: using embedded metal library
+ggml_metal_init: GPU name:   Apple M1 Pro
+ggml_metal_init: GPU family: MTLGPUFamilyApple7  (1007)
+ggml_metal_init: GPU family: MTLGPUFamilyCommon3 (3003)
+ggml_metal_init: GPU family: MTLGPUFamilyMetal3  (5001)
+ggml_metal_init: simdgroup reduction   = true
+ggml_metal_init: simdgroup matrix mul. = true
+ggml_metal_init: has residency sets    = false
+ggml_metal_init: has bfloat            = true
+ggml_metal_init: use bfloat            = false
+ggml_metal_init: hasUnifiedMemory      = true
+ggml_metal_init: recommendedMaxWorkingSetSize  = 22906.50 MB
+ggml_metal_init: loaded kernel_add                                    0x132ba02e0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_add_row                                0x132ba4b10 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_sub                                    0x132cbe670 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_sub_row                                0x132ba6050 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul                                    0x132ba7700 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_row                                0x132ba66c0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_div                                    0x132ba81b0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_div_row                                0x132ba9080 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_repeat_f32                             0x132ba98c0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_repeat_f16                             0x132ba8890 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_repeat_i32                             0x132baa1c0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_repeat_i16                             0x132baa980 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_scale                                  0x146f50af0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_scale_4                                0x146f52110 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_clamp                                  0x146f51090 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_tanh                                   0x146f536a0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_relu                                   0x146f540f0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_sigmoid                                0x146f54b20 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_gelu                                   0x146f55540 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_gelu_4                                 0x146f54f30 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_gelu_quick                             0x146f56240 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_gelu_quick_4                           0x146f576a0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_silu                                   0x146f58100 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_silu_4                                 0x146f58d90 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_elu                                    0x146f596b0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_soft_max_f16                           0x146f59ef0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_soft_max_f16_4                         0x146f5ac90 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_soft_max_f32                           0x146f5b640 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_soft_max_f32_4                         0x146f5be20 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_diag_mask_inf                          0x146f5a150 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_diag_mask_inf_8                        0x146f5c9a0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_f32                           0x146f5d130 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_f16                           0x146f5d640 | th_max = 1024 | th_width =   32
+ggml_metal_init: skipping kernel_get_rows_bf16                     (not supported)
+ggml_metal_init: loaded kernel_get_rows_q4_0                          0x146f5de90 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q4_1                          0x146f5e670 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q5_0                          0x146f5ee20 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q5_1                          0x146f5f600 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q8_0                          0x146f5fde0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q2_K                          0x146f60850 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q3_K                          0x146f61080 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q4_K                          0x146f61860 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q5_K                          0x146f62040 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_q6_K                          0x146f62850 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq2_xxs                       0x146f630a0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq2_xs                        0x146f63870 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq3_xxs                       0x146f640b0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq3_s                         0x146f64890 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq2_s                         0x146f652b0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq1_s                         0x146f659a0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq1_m                         0x146f661d0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq4_nl                        0x146f66990 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_iq4_xs                        0x146f67160 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_get_rows_i32                           0x146f678e0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_rms_norm                               0x146f68130 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_l2_norm                                0x146f68870 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_group_norm                             0x146f690d0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_norm                                   0x146f698b0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_ssm_conv_f32                           0x146f69ff0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_ssm_scan_f32                           0x146f6a7f0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_rwkv_wkv6_f32                          0x146f6af30 | th_max =  448 | th_width =   32
+ggml_metal_init: loaded kernel_rwkv_wkv7_f32                          0x146f6b6c0 | th_max =  448 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_f32_f32                         0x146f6be00 | th_max = 1024 | th_width =   32
+ggml_metal_init: skipping kernel_mul_mv_bf16_f32                   (not supported)
+ggml_metal_init: skipping kernel_mul_mv_bf16_f32_1row              (not supported)
+ggml_metal_init: skipping kernel_mul_mv_bf16_f32_l4                (not supported)
+ggml_metal_init: skipping kernel_mul_mv_bf16_bf16                  (not supported)
+ggml_metal_init: loaded kernel_mul_mv_f16_f32                         0x146f6c630 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_f16_f32_1row                    0x146f6ce10 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_f16_f32_l4                      0x146f6d650 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_f16_f16                         0x146f6de30 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q4_0_f32                        0x146f6e660 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q4_1_f32                        0x146f6ee10 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q5_0_f32                        0x146f6f620 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q5_1_f32                        0x146f6fe00 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q8_0_f32                        0x137117270 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_f16_f32_r1_2                0x137117c60 | th_max =  896 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_f16_f32_r1_3                0x146f701f0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_f16_f32_r1_4                0x146f705e0 | th_max =  512 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_f16_f32_r1_5                0x146f70e30 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_0_f32_r1_2               0x146f71670 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_0_f32_r1_3               0x146f71ec0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_0_f32_r1_4               0x146f72710 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_0_f32_r1_5               0x146f72f80 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_1_f32_r1_2               0x146f737d0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_1_f32_r1_3               0x146f74020 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_1_f32_r1_4               0x146f74850 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_1_f32_r1_5               0x146f75080 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_0_f32_r1_2               0x146f758b0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_0_f32_r1_3               0x146f760e0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_0_f32_r1_4               0x146f76c00 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_0_f32_r1_5               0x146f77430 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_1_f32_r1_2               0x146f77c60 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_1_f32_r1_3               0x146f78490 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_1_f32_r1_4               0x146f78cc0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_1_f32_r1_5               0x146f794f0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q8_0_f32_r1_2               0x146f79d20 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q8_0_f32_r1_3               0x146f7a550 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q8_0_f32_r1_4               0x146f7ad80 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q8_0_f32_r1_5               0x146f7b5b0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_K_f32_r1_2               0x146f7bde0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_K_f32_r1_3               0x132cbef90 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_K_f32_r1_4               0x132cbf860 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q4_K_f32_r1_5               0x132cbfce0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_K_f32_r1_2               0x132cc01c0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_K_f32_r1_3               0x132cc1c00 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_K_f32_r1_4               0x132baae90 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q5_K_f32_r1_5               0x132bab580 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q6_K_f32_r1_2               0x147804360 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q6_K_f32_r1_3               0x14780aea0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q6_K_f32_r1_4               0x14780b2d0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_q6_K_f32_r1_5               0x146f64e80 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_iq4_nl_f32_r1_2             0x146f7c7d0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_iq4_nl_f32_r1_3             0x146f7d380 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_iq4_nl_f32_r1_4             0x146f7dbd0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_ext_iq4_nl_f32_r1_5             0x146f7e410 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q2_K_f32                        0x146f7ec50 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q3_K_f32                        0x146f7ccb0 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q4_K_f32                        0x146f7f5d0 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q5_K_f32                        0x146f7fdb0 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_q6_K_f32                        0x146f80570 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq2_xxs_f32                     0x146f80d20 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq2_xs_f32                      0x146f81510 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq3_xxs_f32                     0x146f81cf0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq3_s_f32                       0x146f82510 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq2_s_f32                       0x146f82d20 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq1_s_f32                       0x146f83560 | th_max =  448 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq1_m_f32                       0x146f83d70 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq4_nl_f32                      0x146f848a0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_iq4_xs_f32                      0x146f850e0 | th_max =  896 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_f32_f32                      0x146f85920 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_f16_f32                      0x146f86130 | th_max = 1024 | th_width =   32
+ggml_metal_init: skipping kernel_mul_mv_id_bf16_f32                (not supported)
+ggml_metal_init: loaded kernel_mul_mv_id_q4_0_f32                     0x146f86990 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q4_1_f32                     0x146f871f0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q5_0_f32                     0x146f87a20 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q5_1_f32                     0x146f88260 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q8_0_f32                     0x146f88a90 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q2_K_f32                     0x146f892d0 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q3_K_f32                     0x146f89b00 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q4_K_f32                     0x146f8a340 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q5_K_f32                     0x146f8ab70 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_q6_K_f32                     0x146f8b3b0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq2_xxs_f32                  0x146f8bbe0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq2_xs_f32                   0x146f8c420 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq3_xxs_f32                  0x146f8cc50 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq3_s_f32                    0x146f8d490 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq2_s_f32                    0x146f8dcc0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq1_s_f32                    0x146f8e500 | th_max =  448 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq1_m_f32                    0x137118730 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq4_nl_f32                   0x137118050 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mv_id_iq4_xs_f32                   0x13711a050 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_f32_f32                         0x137119160 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_f16_f32                         0x13711aa20 | th_max =  832 | th_width =   32
+ggml_metal_init: skipping kernel_mul_mm_bf16_f32                   (not supported)
+ggml_metal_init: loaded kernel_mul_mm_q4_0_f32                        0x13711b160 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q4_1_f32                        0x13711c030 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q5_0_f32                        0x13711b950 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q5_1_f32                        0x13711cfd0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q8_0_f32                        0x13711d7e0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q2_K_f32                        0x13711dff0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q3_K_f32                        0x13711e7a0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q4_K_f32                        0x13711ef50 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q5_K_f32                        0x13711f730 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_q6_K_f32                        0x14780ba10 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq2_xxs_f32                     0x137205d50 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq2_xs_f32                      0x1372066b0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq3_xxs_f32                     0x146f8ed30 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq3_s_f32                       0x146f8f570 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq2_s_f32                       0x146f90420 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq1_s_f32                       0x146f90c30 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq1_m_f32                       0x146f91440 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq4_nl_f32                      0x146f91c50 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_iq4_xs_f32                      0x146f924c0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_f32_f32                      0x146f92d00 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_f16_f32                      0x146f93560 | th_max =  832 | th_width =   32
+ggml_metal_init: skipping kernel_mul_mm_id_bf16_f32                (not supported)
+ggml_metal_init: loaded kernel_mul_mm_id_q4_0_f32                     0x146f93d90 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q4_1_f32                     0x146f945d0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q5_0_f32                     0x146f94e30 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q5_1_f32                     0x146f95670 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q8_0_f32                     0x146f95ed0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q2_K_f32                     0x146f96710 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q3_K_f32                     0x146f96f70 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q4_K_f32                     0x146f977b0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q5_K_f32                     0x146f98010 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_q6_K_f32                     0x146f98850 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq2_xxs_f32                  0x146f990b0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq2_xs_f32                   0x146f998f0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq3_xxs_f32                  0x146f9a150 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq3_s_f32                    0x146f9a990 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq2_s_f32                    0x146f9b1f0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq1_s_f32                    0x146f9ba30 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq1_m_f32                    0x146f9c290 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq4_nl_f32                   0x146f9cad0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_mul_mm_id_iq4_xs_f32                   0x132cc0cf0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_rope_norm_f32                          0x132cc2600 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_rope_norm_f16                          0x132cc3480 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_rope_neox_f32                          0x132cc2da0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_rope_neox_f16                          0x132cc4420 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_im2col_f16                             0x132cc4c00 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_im2col_f32                             0x132cc5410 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_im2col_ext_f16                         0x132cc5bf0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_im2col_ext_f32                         0x132cc6400 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_conv_transpose_1d_f32_f32              0x132cc6be0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_conv_transpose_1d_f16_f32              0x132cc7470 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_upscale_f32                            0x132cc7cd0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_pad_f32                                0x132cc8480 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_pad_reflect_1d_f32                     0x132cc3df0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_unpad_f32                              0x132cc8d70 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_timestep_embedding_f32                 0x132cc9bf0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_arange_f32                             0x146f9cd00 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_argsort_f32_i32_asc                    0x146f9d0f0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_argsort_f32_i32_desc                   0x146f9d680 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_leaky_relu_f32                         0x146f9df70 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_h64                 0x146f9eb70 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_h80                 0x146f9fc20 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_h96                 0x146fa0460 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_h112                0x146fa0cb0 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_h128                0x146fa1500 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_h192                0x146fa1d50 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_hk192_hv128         0x146fa25a0 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_f16_h256                0x146fa2e10 | th_max =  832 | th_width =   32
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_h64           (not supported)
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_h80           (not supported)
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_h96           (not supported)
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_h112          (not supported)
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_h128          (not supported)
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_h192          (not supported)
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_hk192_hv128   (not supported)
+ggml_metal_init: skipping kernel_flash_attn_ext_bf16_h256          (not supported)
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_h64                0x146fa3650 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_h80                0x146fa3ea0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_h96                0x146fa46f0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_h112               0x146fa4f40 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_h128               0x146fa57a0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_h192               0x146fa6000 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_hk192_hv128        0x146fa6860 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_0_h256               0x146fa70d0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_h64                0x146fa7c20 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_h80                0x146fa8460 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_h96                0x146fa8cc0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_h112               0x146fa9500 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_h128               0x146fa9d70 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_h192               0x146faa5d0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_hk192_hv128        0x146faae30 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q4_1_h256               0x146fab6a0 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_h64                0x13711ff50 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_h80                0x137120340 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_h96                0x146fac110 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_h112               0x146fac500 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_h128               0x146fad480 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_h192               0x146fadcc0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_hk192_hv128        0x146fae520 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_0_h256               0x146faed90 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_h64                0x146faf5f0 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_h80                0x146fafe30 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_h96                0x146fb0690 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_h112               0x146fb0ed0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_h128               0x146fb1730 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_h192               0x146f9f5c0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_hk192_hv128        0x146fb2150 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q5_1_h256               0x146fb2ba0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_h64                0x146fb3400 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_h80                0x146fb3c30 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_h96                0x132cc9e20 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_h112               0x132cca650 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_h128               0x146fb4630 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_h192               0x146fb4a20 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_hk192_hv128        0x146fb52c0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_q8_0_h256               0x146fb5ba0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_f16_h128            0x146fb6700 | th_max = 1024 | th_width =   32
+ggml_metal_init: skipping kernel_flash_attn_ext_vec_bf16_h128      (not supported)
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_0_h128           0x146fb6400 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_1_h128           0x146fb7060 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_0_h128           0x146fb78c0 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_1_h128           0x146fb8120 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q8_0_h128           0x146fb8980 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_f16_h192            0x146fb9210 | th_max =  832 | th_width =   32
+ggml_metal_init: skipping kernel_flash_attn_ext_vec_bf16_h192      (not supported)
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_0_h192           0x146fb9a50 | th_max =  896 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_1_h192           0x146fba2c0 | th_max =  896 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_0_h192           0x146fbab30 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_1_h192           0x146fbb390 | th_max =  704 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q8_0_h192           0x146fbbbd0 | th_max =  896 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_f16_hk192_hv128      0x146fbc410 | th_max =  896 | th_width =   32
+ggml_metal_init: skipping kernel_flash_attn_ext_vec_bf16_hk192_hv128 (not supported)
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_0_hk192_hv128      0x146fbcc70 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_1_hk192_hv128      0x146fbd500 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_0_hk192_hv128      0x146fbdd60 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_1_hk192_hv128      0x146fbe5d0 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q8_0_hk192_hv128      0x146fbee30 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_f16_h256            0x146fbf6a0 | th_max =  768 | th_width =   32
+ggml_metal_init: skipping kernel_flash_attn_ext_vec_bf16_h256      (not supported)
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_0_h256           0x146fbff00 | th_max =  832 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q4_1_h256           0x146fc0760 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_0_h256           0x146fc0fc0 | th_max =  640 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q5_1_h256           0x146fc1820 | th_max =  576 | th_width =   32
+ggml_metal_init: loaded kernel_flash_attn_ext_vec_q8_0_h256           0x146fc2080 | th_max =  768 | th_width =   32
+ggml_metal_init: loaded kernel_set_f32                                0x146fc28e0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_set_i32                                0x146fc3140 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f32_f32                            0x146fc38f0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f32_f16                            0x146fc46c0 | th_max = 1024 | th_width =   32
+ggml_metal_init: skipping kernel_cpy_f32_bf16                      (not supported)
+ggml_metal_init: loaded kernel_cpy_f16_f32                            0x146fc4e70 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f16_f16                            0x146fc5650 | th_max = 1024 | th_width =   32
+ggml_metal_init: skipping kernel_cpy_bf16_f32                      (not supported)
+ggml_metal_init: skipping kernel_cpy_bf16_bf16                     (not supported)
+ggml_metal_init: loaded kernel_cpy_f32_q8_0                           0x146fc5e30 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f32_q4_0                           0x146fc6610 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f32_q4_1                           0x146fc6df0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f32_q5_0                           0x146fc75d0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f32_q5_1                           0x146fc7db0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_f32_iq4_nl                         0x146fc8590 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q4_0_f32                           0x146fc8d70 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q4_0_f16                           0x146fc9550 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q4_1_f32                           0x146fc9d30 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q4_1_f16                           0x146fca510 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q5_0_f32                           0x146fcacf0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q5_0_f16                           0x146fcb4d0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q5_1_f32                           0x146fcbcb0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q5_1_f16                           0x146fcc490 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q8_0_f32                           0x146fccc70 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cpy_q8_0_f16                           0x146fcd450 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_concat                                 0x146fc40d0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_sqr                                    0x132bac0d0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_sqrt                                   0x132bad4f0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_sin                                    0x132badf40 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_cos                                    0x132bae990 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_neg                                    0x132baf390 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_sum_rows                               0x132baebc0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_argmax                                 0x132bafb50 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_pool_2d_avg_f32                        0x132bb02e0 | th_max = 1024 | th_width =   32
+ggml_metal_init: loaded kernel_pool_2d_max_f32                        0x132bb0510 | th_max = 1024 | th_width =   32
+set_abort_callback: call
+llama_context:        CPU  output buffer size =     0.81 MiB
+llama_context: n_ctx = 32768
+llama_context: n_ctx = 32768 (padded)
+init: kv_size = 32768, offload = 1, type_k = 'f16', type_v = 'f16', n_layer = 36, can_shift = 1
+init: layer   0: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   1: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   2: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   3: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   4: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   5: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   6: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   7: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   8: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer   9: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  10: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  11: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  12: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  13: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  14: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  15: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  16: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  17: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  18: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  19: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  20: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  21: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  22: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  23: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  24: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  25: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  26: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  27: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  28: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  29: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  30: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  31: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  32: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  33: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  34: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+init: layer  35: n_embd_k_gqa = 1024, n_embd_v_gqa = 1024, dev = Metal
+time=2025-04-25T11:50:59.750+05:30 level=INFO source=server.go:614 msg="waiting for server to become available" status="llm server loading model"
+time=2025-04-25T11:50:59.750+05:30 level=DEBUG source=server.go:625 msg="model load progress 1.00"
+time=2025-04-25T11:51:00.002+05:30 level=DEBUG source=server.go:628 msg="model load completed, waiting for server to become available" status="llm server loading model"
+init:      Metal KV buffer size =  4608.00 MiB
+llama_context: KV self size  = 4608.00 MiB, K (f16): 2304.00 MiB, V (f16): 2304.00 MiB
+llama_context: enumerating backends
+llama_context: backend_ptrs.size() = 2
+llama_context: max_nodes = 65536
+llama_context: worst-case: n_tokens = 512, n_seqs = 1, n_outputs = 0
+llama_context: reserving graph for n_tokens = 512, n_seqs = 1
+llama_context: reserving graph for n_tokens = 1, n_seqs = 1
+llama_context: reserving graph for n_tokens = 512, n_seqs = 1
+llama_context:      Metal compute buffer size =  2144.00 MiB
+llama_context:        CPU compute buffer size =    72.01 MiB
+llama_context: graph nodes  = 1482
+llama_context: graph splits = 2
+time=2025-04-25T11:51:00.254+05:30 level=INFO source=server.go:619 msg="llama runner started in 0.76 seconds"
+time=2025-04-25T11:51:00.254+05:30 level=DEBUG source=sched.go:464 msg="finished setting up runner" model=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa
+time=2025-04-25T11:51:00.257+05:30 level=DEBUG source=routes.go:1523 msg="chat request" images=0 prompt="System:\n<important_rules>\n  Always include the language and file name in the info string when you write code blocks. If you are editing \"src/main.py\" for example, your code block should start with '```python src/main.py'.\n</important_rules>\n\nQuestion:\nanswer brief: What is AWS?\n\nAnswer:\n"
+time=2025-04-25T11:51:00.261+05:30 level=DEBUG source=cache.go:104 msg="loading cache slot" id=0 cache=0 prompt=78 used=0 remaining=78
+[GIN] 2025/04/25 - 11:51:59 | 200 |         337µs |       127.0.0.1 | HEAD     "/"
+[GIN] 2025/04/25 - 11:51:59 | 200 |       145.5µs |       127.0.0.1 | GET      "/api/ps"
+[GIN] 2025/04/25 - 11:52:08 | 200 |          1m9s |       127.0.0.1 | POST     "/api/chat"
+time=2025-04-25T11:52:08.954+05:30 level=DEBUG source=sched.go:468 msg="context for request finished"
+time=2025-04-25T11:52:08.954+05:30 level=DEBUG source=sched.go:341 msg="runner with non-zero duration has gone idle, adding timer" modelPath=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa duration=30m0s
+time=2025-04-25T11:52:08.954+05:30 level=DEBUG source=sched.go:359 msg="after processing request finished event" modelPath=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa refCount=0
+time=2025-04-25T11:52:08.959+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:52:08.960+05:30 level=DEBUG source=sched.go:577 msg="evaluating already loaded" model=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa
+time=2025-04-25T11:52:08.962+05:30 level=DEBUG source=routes.go:1523 msg="chat request" images=0 prompt="Question:\nGiven the following... please reply with a title for the chat that is 3-4 words in length, all words used should be directly related to the content of the chat, avoid using verbs unless they are directly related to the content of the chat, no additional text or explanation, you don't need ending punctuation.\n\nAWS stands for Amazon Web Services. It provides cloud computing and APIs to companies and individuals. It can be used to train AIs, host websites, run analytics, manage blockchains, host games, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host\n\nAnswer:\n"
+time=2025-04-25T11:52:09.042+05:30 level=DEBUG source=cache.go:104 msg="loading cache slot" id=1 cache=0 prompt=1550 used=0 remaining=1550
+time=2025-04-25T11:52:10.818+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:52:10.819+05:30 level=DEBUG source=sched.go:577 msg="evaluating already loaded" model=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa
+time=2025-04-25T11:52:10.858+05:30 level=DEBUG source=routes.go:1523 msg="chat request" images=0 prompt="System:\n<important_rules>\n  Always include the language and file name in the info string when you write code blocks. If you are editing \"src/main.py\" for example, your code block should start with '```python src/main.py'.\n</important_rules>\n\nQuestion:\nanswer brief: What is AWS?\n\nAnswer:\nAWS stands for Amazon Web Services. It provides cloud computing and APIs to companies and individuals. It can be used to train AIs, host websites, run analytics, manage blockchains, host games, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host games, manage security, interface with Internet of Things items, run containers, host\n\nQuestion:\nWhat is java?\n\nAnswer:\n"
+time=2025-04-25T11:52:14.568+05:30 level=DEBUG source=cache.go:104 msg="loading cache slot" id=2 cache=0 prompt=1567 used=0 remaining=1567
+[GIN] 2025/04/25 - 11:52:27 | 200 | 18.367188209s |       127.0.0.1 | POST     "/api/chat"
+time=2025-04-25T11:52:27.318+05:30 level=DEBUG source=sched.go:409 msg="context for request finished"
+time=2025-04-25T11:52:27.318+05:30 level=DEBUG source=sched.go:359 msg="after processing request finished event" modelPath=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa refCount=1
+[GIN] 2025/04/25 - 11:52:32 | 200 | 21.195961292s |       127.0.0.1 | POST     "/api/chat"
+time=2025-04-25T11:52:32.008+05:30 level=DEBUG source=sched.go:409 msg="context for request finished"
+time=2025-04-25T11:52:32.008+05:30 level=DEBUG source=sched.go:341 msg="runner with non-zero duration has gone idle, adding timer" modelPath=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa duration=30m0s
+time=2025-04-25T11:52:32.008+05:30 level=DEBUG source=sched.go:359 msg="after processing request finished event" modelPath=/Users/sachinsuresh/.ollama/models/blobs/sha256-bf481f838ba0e13524bde2f44cfd57a0eefb1c422da885fb26ca6cf12bea11fa refCount=0
+[GIN] 2025/04/25 - 11:54:25 | 200 |      8.2135ms |       127.0.0.1 | GET      "/api/tags"
+time=2025-04-25T11:54:25.538+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.544+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+[GIN] 2025/04/25 - 11:54:25 | 200 |   20.753833ms |       127.0.0.1 | POST     "/api/show"
+time=2025-04-25T11:54:25.551+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.552+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.552+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.553+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.554+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.554+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.554+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.554+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.558+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.558+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.559+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.559+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+[GIN] 2025/04/25 - 11:54:25 | 200 |   16.311125ms |       127.0.0.1 | POST     "/api/show"
+[GIN] 2025/04/25 - 11:54:25 | 200 |   15.452625ms |       127.0.0.1 | POST     "/api/show"
+time=2025-04-25T11:54:25.560+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+[GIN] 2025/04/25 - 11:54:25 | 200 |   18.151208ms |       127.0.0.1 | POST     "/api/show"
+time=2025-04-25T11:54:25.561+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+[GIN] 2025/04/25 - 11:54:25 | 200 |   16.268459ms |       127.0.0.1 | POST     "/api/show"
+time=2025-04-25T11:54:25.561+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+[GIN] 2025/04/25 - 11:54:25 | 200 |   19.400958ms |       127.0.0.1 | POST     "/api/show"
+time=2025-04-25T11:54:25.563+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+[GIN] 2025/04/25 - 11:54:25 | 200 |   20.280375ms |       127.0.0.1 | POST     "/api/show"
+[GIN] 2025/04/25 - 11:54:25 | 200 |   20.417208ms |       127.0.0.1 | POST     "/api/show"
+[GIN] 2025/04/25 - 11:54:25 | 200 |     21.1175ms |       127.0.0.1 | POST     "/api/show"
+time=2025-04-25T11:54:25.567+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+time=2025-04-25T11:54:25.580+05:30 level=WARN source=ggml.go:152 msg="key not found" key=general.alignment default=32
+[GIN] 2025/04/25 - 11:54:25 | 200 |   37.096958ms |       127.0.0.1 | POST     "/api/show"
