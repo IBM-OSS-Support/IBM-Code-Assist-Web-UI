@@ -5,6 +5,9 @@
   "granite3.2:2b": [
     "granite3.2:2b/granite3.2:2b_20250403T225221.json"
   ],
+  "granite3.2:8b": [
+    "granite3.2:8b/granite3.2:8b_20250425T143619.json"
+  ],
   "granite3.3:latest": [
     "granite3.3:latest/granite3.3:latest_20250425T142503.json"
   ]
