@@ -4,7 +4,7 @@
       "name": "gpt-4o",
       "created_at": "20250311T203629",
       "file_name": "gpt-4o_20250311T203629.json",
-      "total_time": 7755.12,
+      "total_time": 74755.125432,
       "prompt": [
         {
           "user": "answer brief: What is AWS?",

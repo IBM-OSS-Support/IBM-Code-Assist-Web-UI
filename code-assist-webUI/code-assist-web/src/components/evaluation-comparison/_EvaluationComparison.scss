@@ -166,7 +166,7 @@
       }
     }
     .result-combo-box,
-    .question-date-picker,
+    .log-combo-box,
     .question-combo-box {
       margin: 0.8rem 0 0 0;
     }
@@ -271,6 +271,78 @@
     &.cds--snippet--has-right-overflow {
       &:after {
         background-image: linear-gradient(to right, #0000, #000000);
+      }
+    }
+  }
+  .filter-btn-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 0.5rem 0 0 0;
+  }
+  .log-modal {
+    &.cds--modal {
+      &.is-visible {
+          .cds--modal-container {
+              min-height: 55%;
+          }
+      }
+    }
+    .log-summary-tile {
+        > p {
+            min-width: 45%;
+        }
+    }
+    .log-summary-tile {
+        margin-bottom: 1.5rem;
+        > h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        .log-summary-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+    
+            > p {
+                min-width: 45%;
+            }
+        }
+    } 
+    .cds--btn--tertiary {
+      flex-grow: 0;
+      max-inline-size: unset;
+      min-block-size: initial;
+      min-width: 10rem;
+      height: 2.5rem;
+      padding: 0.7rem 0.5rem;
+
+      .cds--btn__icon {
+        top: 0.6rem;
+      }
+    }
+    .cds--snippet--multi {
+      background: #000011;
+      height: 100%;
+      max-inline-size: 100%;
+      margin-top: 0.75rem;
+      &.cds--snippet--has-right-overflow {
+        &:after {
+          background-image: linear-gradient(to right, #0000, #000000);
+        }
+      }
+      .cds--snippet-container {
+          min-height: 100% !important;
+      }
+    }
+    .skeleton-wrap {
+      .cds--date-picker--range {
+        .cds--date-picker-container, .cds--date-picker__input {
+          inline-size: 37rem;
+        }
       }
     }
   }

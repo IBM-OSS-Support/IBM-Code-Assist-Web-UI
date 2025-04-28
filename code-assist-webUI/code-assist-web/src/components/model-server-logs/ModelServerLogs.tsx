@@ -190,7 +190,21 @@ const LogsTable: React.FC = () => {
         </Column>
 
         <Column sm={4} md={8} lg={16}>
-          <DataTable
+          <div style={{ marginBottom: "1rem" }}>
+            <Dropdown
+              id="log-dropdown"
+              titleText="Select a Log File"
+              label="Choose a log"
+              items={logFiles}
+              itemToString={(item) => (item ? item.name : "")}
+              onChange={({ selectedItem }) => {
+                if (selectedItem) {
+                  fetchLogContent(selectedItem.name);
+                }
+              }}
+            />
+          </div>
+          {/* <DataTable
             rows={paginatedFiles.map((f, i) => ({
               id: `${startIndex + i}`,
               ...f,
@@ -248,7 +262,7 @@ const LogsTable: React.FC = () => {
               setItemsPerPage(pageSize);
             }}
             page={currentPage}
-          />
+          /> */}
         </Column>
       </Grid>
       {isLoading ? (

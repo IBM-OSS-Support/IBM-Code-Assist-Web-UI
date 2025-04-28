@@ -74,9 +74,9 @@ const Navigation: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <SideNavLink renderIcon={Compare} href="#/model-comparison" onClick={() => handleNavLinkClick('Model Comparison')}>
                 Model Comparison
               </SideNavLink>
-              <SideNavLink renderIcon={CloudLogging} href="#/model-server-logs" onClick={() => handleNavLinkClick('Model Server Logs')}>
+              {/* <SideNavLink renderIcon={CloudLogging} href="#/model-server-logs" onClick={() => handleNavLinkClick('Model Server Logs')}>
                 Model Server Logs
-              </SideNavLink>
+              </SideNavLink> */}
             </SideNavItems>
           </SideNav>
           <HeaderGlobalBar>

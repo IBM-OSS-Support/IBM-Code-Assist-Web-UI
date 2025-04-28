@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicker, DatePickerInput, RadioButton, RadioButtonGroup, Tag, Dropdown, CodeSnippet, Tooltip } from "@carbon/react";
+import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicker, DatePickerInput, RadioButton, RadioButtonGroup, Tag, Dropdown, CodeSnippet, Tooltip, Loading, Modal, Tile, CodeSnippetSkeleton, ButtonSkeleton, DropdownSkeleton } from "@carbon/react";
 import "./_EvaluationComparison.scss";
 import { format, isValid, parse } from "date-fns";
-import { FlashFilled, Help } from "@carbon/react/icons";
+import { Download, FilterRemove, FilterReset, FlashFilled, Help } from "@carbon/react/icons";
 import { se } from "date-fns/locale";
 
 
@@ -11,6 +11,7 @@ const GITHUB_USERNAME = "IBM-OSS-Support";
 const REPO_BRANCH = "gh-pages";
 const GITHUB_INDEX_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src/prompt-results/index.json`;
 const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/code-assist-webUI/code-assist-web/src`;
+const GITHUB_LOG_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM-Code-Assist-Web-UI/${REPO_BRANCH}/logs`;
 
 interface Model {
     name: string;
@@ -19,6 +20,11 @@ interface Model {
     total_time: string
     prompt: { user: string; assistant: string; }[];
 }
+interface LogFile {
+    name: string;
+    date: string;
+    rawDate: string;
+  }
 
 const ModelComparison = () => {
     const [selectedGranite, setSelectedGranite] = useState<string | null>(null);
@@ -42,6 +48,11 @@ const ModelComparison = () => {
     const [usingGitHub, setUsingGitHub] = useState(false);
     const [fastestTime, setFastestTime] = useState<number | null>(null);
     const [filteredPrompts, setFilteredPrompts] = useState<{ [key: string]: any[] }>({});
+    const [logFiles, setLogFiles] = useState<LogFile[]>([]);
+    const [selectedLog, setSelectedLog] = useState<string | null>(null);
+    const [logContent, setLogContent] = useState<string | null>(null);
+    const [logSummary, setLogSummary] = useState<Record<string, string>>({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Modified backend URL detection with GitHub fallback
     const getBackendURL = () => {
@@ -461,6 +472,137 @@ const ModelComparison = () => {
     //     updateFilteredPrompts();
     // }, [selectedResults, modelsData]);
 
+
+    // To Fetch Log Files
+    const formatDate = (dateStr: string) => {
+        const date = new Date(
+          `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}T${dateStr.substring(9, 11)}:${dateStr.substring(11, 13)}:${dateStr.substring(13, 15)}`
+        );
+        return {
+          formatted: date.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+          }).replace(",", ""),
+          raw: date.toISOString(),
+        };
+    };
+
+    const extractLogValues = (logText: string) => {
+        const patterns = [
+          "general.basename str",
+          "llm_load_print_meta: general.name",
+        //   "general.size_label str",
+        //   "llm_load_print_meta: model params",
+          "llm_load_print_meta: model size",
+          "ggml_metal_init: found device",
+          "ggml_metal_init: GPU name",
+          "ggml_metal_init: recommendedMaxWorkingSetSize"
+        ];
+      
+        const extracted: Record<string, string> = {};
+      
+        for (const pattern of patterns) {
+          const escapedPattern = pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+          const regex = new RegExp(`${escapedPattern}\\s*[:=]\\s*(.+)`);
+          const match = logText.match(regex);
+          if (match) {
+            extracted[pattern] = match[1].trim();
+          }
+        }
+      
+        return extracted;
+    };
+
+    const fetchLogFiles = async (promptText: string) => {
+        try {
+            const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
+            const response = await fetch(logsJsonUrl);
+            if (!response.ok) throw new Error("Failed to fetch log files");
+            const files: string[] = await response.json();
+    
+            const matchingFiles: LogFile[] = [];
+    
+            for (const file of files) {
+                const fileNameWithoutLogs = file.replace("logs/", "");
+                const logFileUrl = `${GITHUB_LOG_URL}/${fileNameWithoutLogs}`;
+                const logResponse = await fetch(logFileUrl);
+                if (!logResponse.ok) continue;
+    
+                const logContent = await logResponse.text();
+                if (logContent.includes(promptText)) {
+                    const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
+                    const { formatted, raw } = match ? formatDate(match[1]) : { formatted: "Unknown Date", raw: "0" };
+                    matchingFiles.push({ name: fileNameWithoutLogs, date: formatted, rawDate: raw });
+                }
+            }
+    
+            const sortedFiles = matchingFiles.sort((a, b) =>
+                new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
+            );
+    
+            setLogFiles(sortedFiles);
+        } catch (error) {
+            console.error("Error fetching log files:", error);
+        }
+    };
+
+    const fetchLogContent = async (fileName: string) => {
+        try {
+            setIsLoading(true);
+            setSelectedLog(fileName);
+            setIsModalOpen(true);
+    
+            const logFileUrl = `${GITHUB_LOG_URL}/${fileName}`;
+            const response = await fetch(logFileUrl);
+            if (!response.ok) throw new Error("Failed to fetch log content");
+            const content = await response.text();
+    
+            setLogContent(content);
+            const summary = extractLogValues(content);
+            setLogSummary(summary);
+        } catch (error) {
+            console.error("Error fetching log content:", error);
+            setLogContent("⚠️ Failed to load content.");
+            setLogSummary({});
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const downloadLog = (format: "json" | "csv" | "log") => {
+        if (!selectedLog || !logContent) return;
+      
+        let blob: Blob;
+        let filename = selectedLog;
+      
+        if (format === "json") {
+          blob = new Blob([JSON.stringify({ content: logContent }, null, 2)], {
+            type: "application/json",
+          });
+          filename = filename.replace(".log", ".json");
+        } else if (format === "csv") {
+          // Treating the entire log file as a single column in CSV
+          const csvContent = `"log_content"\n"${logContent.replace(/"/g, '""')}"`;
+          blob = new Blob([csvContent], { type: "text/csv" });
+          filename = filename.replace(".log", ".csv");
+        } else {
+          blob = new Blob([logContent], { type: "text/plain" });
+        }
+      
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    };
+
     const handleCompare = () => {
         if (selectedGranite && selectedOther) {
           setIsLoading(true);
@@ -875,7 +1017,37 @@ const ModelComparison = () => {
                                             </p>
                                         </div>
 
-                                        <div style={{ margin: "0.5rem 0"}}>
+                                        <div className="filter-wrap" style={{ margin: "0.5rem 0"}}>
+                                            {/* {(selectedResults[`${model?.model?.name}-${index}`] || model?.modelJsonFiles?.length === 1) && (
+                                                <div className="filter-btn-wrap">
+                                                    <Button
+                                                        renderIcon={FilterRemove} 
+                                                        iconDescription="Reset Filter" 
+                                                        hasIconOnly
+                                                        kind="danger--ghost"
+                                                        size="md"
+                                                        onClick={() => {
+                                                            const compositeKey = `${model?.model?.name}-${index}`;
+                                                            setSelectedQuestions(prev => ({ ...prev, [compositeKey]: "All" }));
+                                                            setSelectedResults(prev => ({ ...prev, [compositeKey]: '' }));
+                                                            setSelectedDates(prev => ({ ...prev, [modelName]: null }));
+                                                        }}
+                                                        disabled={
+                                                            !selectedResults[`${model?.model?.name}-${index}`] &&
+                                                            !selectedDates[model?.model?.name as string]
+                                                        }
+                                                        style={{ 
+                                                            marginTop: "0.8rem",
+                                                            padding: "0.5rem 1rem",
+                                                            width: "3rem",
+                                                            alignItems: "center",
+                                                            justifyContent: "center",
+                                                            float: "right",
+                                                            display: !selectedResults[`${model?.model?.name}-${index}`] ? "none" : "block"
+                                                        }}
+                                                    />
+                                                </div>
+                                            )} */}
                                             <Grid fullWidth narrow>
                                                 <Column lg={8} md={8} sm={4}>
                                                     <ComboBox
@@ -942,46 +1114,44 @@ const ModelComparison = () => {
                                                             setSelectedQuestions((prev) => ({
                                                                 ...prev,
                                                                 [questionKey || 'default_key']: selectedItem as string,
-                                                            }))}
-                                                        }
+                                                            }));
+                                                    
+                                                            // Extract the prompt text from the selected question
+                                                            const promptText = selectedItem?.split(": ")[1] || "";
+                                                            fetchLogFiles(promptText); // Fetch log files matching the prompt text
+                                                        }}
                                                         selectedItem={selectedQuestion}
                                                         titleText="Select a Question"
                                                         label="Choose a question"
                                                     />
                                                 </Column>
-                                            </Grid>
-
-                                            
-                                            <Grid fullWidth narrow> 
-                                                {(selectedResults[`${model?.model?.name}-${index}`] || model?.modelJsonFiles?.length === 1) && (
-                                                <Column lg={16} md={8} sm={4}>
-                                                    <Button
-                                                        kind="danger--tertiary"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            const compositeKey = `${model?.model?.name}-${index}`;
-                                                            setSelectedQuestions(prev => ({ ...prev, [compositeKey]: "All" }));
-                                                            setSelectedResults(prev => ({ ...prev, [compositeKey]: '' }));
-                                                            setSelectedDates(prev => ({ ...prev, [modelName]: null }));
-                                                        }}
-                                                        disabled={
-                                                            !selectedResults[`${model?.model?.name}-${index}`] &&
-                                                            !selectedDates[model?.model?.name as string]
-                                                        }
-                                                        style={{ 
-                                                            marginTop: "0.8rem",
-                                                            padding: "0.5rem 1rem",
-                                                            width: "10rem",
-                                                            alignItems: "center",
-                                                            justifyContent: "center",
-                                                            float: "right",
-                                                            display: !selectedResults[`${model?.model?.name}-${index}`] ? "none" : "block"
-                                                        }}
-                                                    >
-                                                        Reset Filter
-                                                    </Button>
+                                                <Column lg={8} md={8} sm={4}>
+                                                    {selectedQuestions[`${model?.model?.name}-${index}`] !== "All" && (
+                                                        <>
+                                                            {selectedQuestions[`${model?.model?.name}-${index}`] && (
+                                                                isLoading || logFiles.length === 0 ? (
+                                                                    <div className="skeleton-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "1rem 0 0" }}>
+                                                                        <DropdownSkeleton />
+                                                                    </div>
+                                                                ) : (
+                                                                    <Dropdown
+                                                                        id="log-dropdown"
+                                                                        className="log-combo-box"
+                                                                        titleText="Select a Log File"
+                                                                        label="Choose a Log File"
+                                                                        items={logFiles} // Use the filtered log files
+                                                                        itemToString={(item) => (item ? item.name : "")}
+                                                                        onChange={({ selectedItem }) => {
+                                                                            if (selectedItem) {
+                                                                                fetchLogContent(selectedItem.name);
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                )
+                                                            )}
+                                                        </>
+                                                    )}
                                                 </Column>
-                                                )}
                                             </Grid>
                                         </div>
                                         <p>
@@ -1066,6 +1236,72 @@ const ModelComparison = () => {
                 )
                 }
             </Grid>
+            {isLoading ? (
+                <></>
+                // <div className="loader-wrap" style={{ padding: "1rem" }}>
+                //     <Loading />
+                // </div>
+            ) : (
+                <Modal
+                    open={isModalOpen}
+                    modalHeading={`Log Content: ${selectedLog}`}
+                    passiveModal
+                    onRequestClose={() => setIsModalOpen(false)}
+                    size="lg"
+                    className="log-modal"
+                >
+                    
+                    <> {isLoading ? (
+                        <div className="skeleton-wrap" style={{ display: "flex", flexDirection: "column", width: "300px", height: "350px", alignItems: "center", justifyContent: "center", margin: "4rem auto 0", padding: "1rem" }}>
+                            <DatePickerSkeleton range />
+                            <DatePickerSkeleton range />
+                        </div>
+                    ): (
+                        <>
+                            {Object.keys(logSummary).length > 0 && (
+                                <div>
+                                    <div style={{ margin: "1rem 0", display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+                                        <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("json")}>Download JSON</Button>{" "}
+                                        <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("csv")}>Download CSV</Button>{" "}
+                                        <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("log")}>Download .log</Button>
+                                    </div>
+                                    <Tile className="log-summary-tile">
+                                        <h4>Log Summary</h4>
+                                        <div className="log-summary-content">
+                                            {Object.entries(logSummary).map(([key, value]) => {
+                                                const labelMap: Record<string, string> = {
+                                                    "general.basename str": "Basename:",
+                                                    "llm_load_print_meta: general.name": "General Name:",
+                                                    "llm_load_print_meta: model size": "Model Size:",
+                                                    "ggml_metal_init: found device": "User Device:",
+                                                    "ggml_metal_init: GPU name": "GPU Name:",
+                                                    "ggml_metal_init: recommendedMaxWorkingSetSize": "Recommended GPU Memory:"
+                                                };
+                                                return (
+                                                    <p key={key} style={{ marginBottom: "0.5rem" }}>
+                                                        <strong style={{ color: "#08BDBA" }}>{labelMap[key] || key}</strong>{" "}
+                                                        <span style={{ color: "#F1C21B" }}>{value}</span>
+                                                    </p>
+                                                );
+                                            })}
+                                        </div>
+                                    </Tile>
+                                </div>
+                            )}
+
+                            <CodeSnippet
+                            key={`${selectedLog}-${Date.now()}`}
+                            type="multi"
+                            feedback="Copied to clipboard"
+                            className="log-content-snippet"
+                            >
+                                {logContent || "No content available"}
+                            </CodeSnippet>
+                        </>
+                    )}
+                    </>
+                </Modal>
+            )}
         </div>
     );
 };
