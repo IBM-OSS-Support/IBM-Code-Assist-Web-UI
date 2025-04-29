@@ -496,8 +496,6 @@ const ModelComparison = () => {
         const patterns = [
           "general.basename str",
           "llm_load_print_meta: general.name",
-        //   "general.size_label str",
-        //   "llm_load_print_meta: model params",
           "llm_load_print_meta: model size",
           "ggml_metal_init: found device",
           "ggml_metal_init: GPU name",
@@ -602,6 +600,39 @@ const ModelComparison = () => {
         a.click();
         a.remove();
     };
+    
+    // Function to Fetch Pass@1 Scores
+    const fetchPassAt1Scores = async () => {
+        try {
+            setIsLoading(true);
+            const url = "https://datasets-server.huggingface.co/rows?dataset=bigcode%2Fbigcodebench-results&config=default&split=train&offset=0&length=100";
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            
+            const jsonData = await response.json();
+            const scores: { [key: string]: string } = {};
+    
+            jsonData.rows.forEach((row: any) => {
+                const modelName = row.row.model || "Unknown";
+                const completePrompt = row.row.complete ?? 0;
+                const instructPrompt = row.row.instruct ?? 0;
+                const averageScore = ((completePrompt + instructPrompt) / 2) * 100;
+                scores[modelName] = `${averageScore.toFixed(1)}%`;
+            });
+    
+            setModelScores(scores);
+        } catch (error) {
+            console.error("Error fetching Pass@1 scores:", error);
+        } finally {
+            console.log("Fetched Pass@1 scores:", modelScores);
+            
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPassAt1Scores();
+    }, []);
 
     const handleCompare = () => {
         if (selectedGranite && selectedOther) {
@@ -976,11 +1007,23 @@ const ModelComparison = () => {
                                             <strong>Pass@1 Score</strong>
                                             <Tag className="score-capsule" size="md" type={
                                                 modelScores[selectedGranite] && modelScores[selectedOther] 
-                                                ? parseFloat(modelScores[model?.model?.name ?? '']) > parseFloat(modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]) 
+                                                ? parseFloat((model?.model?.name?.trim() ?? '')?.split(".")[0]?.trim() || '0') > 
+                                                  parseFloat(modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]?.split(":")[1]?.trim() || '0') 
                                                     ? 'green' 
                                                     : 'red'
                                                 : 'cyan'
-                                            }>{modelScores[model?.model?.name ?? ''] || 'N/A'}</Tag>
+                                            }>
+                                                {(() => {
+                                                    const modelName = model?.model?.name?.trim();
+                                                    const scoreEntry = Object.entries(modelScores).find(([key]) => key.toLowerCase().includes(modelName?.toLowerCase() || ''));
+                                                    if (scoreEntry) {
+                                                        const rawScore = scoreEntry[1]?.split(":")[0]?.trim();
+                                                        const formattedScore = rawScore ? (parseFloat(rawScore) / 100).toFixed(2) + "%" : "N/A";
+                                                        return formattedScore;
+                                                    }
+                                                    return "N/A";
+                                                })()}
+                                            </Tag>
                                             
                                         </div>
 
