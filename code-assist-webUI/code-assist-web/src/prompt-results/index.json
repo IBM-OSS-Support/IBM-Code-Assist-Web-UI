@@ -2,6 +2,9 @@
   "gpt-4o": [
     "gpt-4o/gpt-4o_20250311T203629.json"
   ],
+  "granite-code:3b-instruct": [
+    "granite-code:3b-instruct/granite-code:3b-instruct_20250429T214112.json"
+  ],
   "granite-code:8b-instruct": [
     "granite-code:8b-instruct/granite-code:8b-instruct_20250429T103335.json"
   ],

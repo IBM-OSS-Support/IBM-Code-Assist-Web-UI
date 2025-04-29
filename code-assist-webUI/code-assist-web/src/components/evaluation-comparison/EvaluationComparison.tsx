@@ -616,16 +616,15 @@ const ModelComparison = () => {
                 const modelName = row.row.model || "Unknown";
                 const completePrompt = row.row.complete ?? 0;
                 const instructPrompt = row.row.instruct ?? 0;
-                const averageScore = ((completePrompt + instructPrompt) / 2) * 100;
-                scores[modelName] = `${averageScore.toFixed(1)}%`;
+                const averageScore = ((completePrompt + instructPrompt) / 2);
+                scores[modelName.trim()] = `${averageScore.toFixed(2)}%`;
             });
     
+            console.log("Fetched Pass@1 Scores:", scores); // Debugging
             setModelScores(scores);
         } catch (error) {
             console.error("Error fetching Pass@1 scores:", error);
         } finally {
-            console.log("Fetched Pass@1 scores:", modelScores);
-            
             setIsLoading(false);
         }
     };
@@ -634,11 +633,62 @@ const ModelComparison = () => {
         fetchPassAt1Scores();
     }, []);
 
+    const normalizeGraniteModelName = (modelName: string): string => {
+        return modelName
+            .replace(/:/g, "-") // Replace ":" with "-"
+            .split("-") // Split by "-"
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+            .join("-"); // Join back with "-"
+    };
+
+    const getScoreAndTagType = (modelName: string) => {
+        const normalizedModelName = normalizeGraniteModelName(modelName || '');
+        console.log("Normalized Model Name:", normalizedModelName);
+        console.log("Model Scores Keys:", Object.keys(modelScores));
+    
+        const matchingKey = Object.keys(modelScores).find((key) =>
+            key.toLowerCase().includes(normalizedModelName.toLowerCase()) // Partial match
+        );
+    
+        console.log("Matching Key in Model Scores:", matchingKey);
+    
+        const currentModelScoreRaw = matchingKey ? modelScores[matchingKey]?.split("%")[0]?.trim() : undefined;
+        const comparingModelName = selectedGranite === modelName ? selectedOther : selectedGranite;
+        const comparingKey = Object.keys(modelScores).find((key) =>
+            key.toLowerCase() === normalizeGraniteModelName(comparingModelName ?? '').toLowerCase() // Strict equality check
+        );
+    
+        const comparingModelScoreRaw = comparingKey ? modelScores[comparingKey]?.split("%")[0]?.trim() : undefined;
+    
+        console.log("Current Model Score Raw:", currentModelScoreRaw);
+        console.log("Comparing Model Score Raw:", comparingModelScoreRaw);
+    
+        const currentScore = currentModelScoreRaw ? parseFloat(currentModelScoreRaw) : NaN;
+        const comparingScore = comparingModelScoreRaw ? parseFloat(comparingModelScoreRaw) : NaN;
+    
+        let tagType: 'green' | 'red' | 'cyan' | 'outline';
+    
+        if (isNaN(currentScore) || isNaN(comparingScore)) {
+            tagType = 'outline'; // Show outline if either score is unavailable
+        } else if (currentScore > comparingScore) {
+            tagType = 'green'; // Current model has a higher score
+        } else if (currentScore < comparingScore) {
+            tagType = 'red'; // Current model has a lower score
+        } else {
+            tagType = 'cyan'; // Scores are equal
+        }
+    
+        const formattedScore = !isNaN(currentScore) ? `${currentScore.toFixed(2)}%` : 'N/A';
+    
+        return { formattedScore, tagType };
+    };
+
     const handleCompare = () => {
         if (selectedGranite && selectedOther) {
           setIsLoading(true);
           setTimeout(() => {
             setCompareClicked(true);
+            fetchPassAt1Scores();
             setIsLoading(false);
           }, 2000);
         }
@@ -976,9 +1026,12 @@ const ModelComparison = () => {
                                   
                                     return parts.join(' ');
                                 };
+
+                                // getScoreAndTagType Passing model name
+                                const { formattedScore, tagType } = getScoreAndTagType(model?.model?.name ?? '');
                                   
                                 return (
-                                    <div id={`chat-outter-wrap-${model.model?.name}`} className="chat-outter-wrap" key={`${model?.model?.name}-${index}`}>
+                                    <div id={`chat-outter-wrap-${model.model?.name}`} className="chat-outter-wrap" key={`${model?.model?.name}-${index}`} style={{borderColor: tagType === 'green' ? 'green' : '', boxShadow: tagType === 'green' ? '0 0 3px 2px rgba(107, 116, 107, 0.4)' : ''}}>
                                         
                                         {/* { modelScores[selectedGranite] && modelScores[selectedOther] 
                                             ? parseFloat(modelScores[model?.model?.name ?? '']) > parseFloat(modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]) 
@@ -992,12 +1045,10 @@ const ModelComparison = () => {
                                         } */}
                                         
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                            <h4 style={{ textTransform: "capitalize", marginBottom: "10px", marginTop: "0" }}>{model?.model?.name} {
-                                                modelScores[selectedGranite] && modelScores[selectedOther] 
-                                                ? parseFloat(modelScores[model?.model?.name ?? '']) > parseFloat(modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]) 
+                                            <h4 style={{ textTransform: "capitalize", marginBottom: "10px", marginTop: "0" }}>{`Model-${index+1} :`} {model?.model?.name} {
+                                                tagType === 'green' 
                                                     ? (<span style={{ fontSize: '0.8rem', padding: '0.4rem', color: '#069d37', borderRadius: '10rem' }}>Recommended</span>)
                                                     : ('')
-                                                : ('')
                                             }</h4>
                                         </div>
 
@@ -1005,17 +1056,32 @@ const ModelComparison = () => {
                                         
                                         <div className="score-wrapper">
                                             <strong>Pass@1 Score</strong>
-                                            <Tag className="score-capsule" size="md" type={
-                                                modelScores[selectedGranite] && modelScores[selectedOther] 
-                                                ? parseFloat((model?.model?.name?.trim() ?? '')?.split(".")[0]?.trim() || '0') > 
-                                                  parseFloat(modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]?.split(":")[1]?.trim() || '0') 
-                                                    ? 'green' 
-                                                    : 'red'
-                                                : 'cyan'
+                                            <Tag className="score-capsule" size="md" type={tagType}>
+                                                {formattedScore}
+                                            </Tag>
+                                            {/* <Tag className="score-capsule" size="md"  type={
+                                                modelScores[selectedGranite] && modelScores[selectedOther]
+                                                    ? parseFloat(
+                                                        modelScores[normalizeGraniteModelName(model?.model?.name ?? '')]?.split(":")[0]?.trim() || '0'
+                                                    ) >
+                                                    parseFloat(
+                                                        modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]?.split(":")[0]?.trim() || '0'
+                                                    )
+                                                        ? 'green' // Current model has a higher score
+                                                        : parseFloat(
+                                                            modelScores[normalizeGraniteModelName(model?.model?.name ?? '')]?.split(":")[0]?.trim() || '0'
+                                                        ) <
+                                                        parseFloat(
+                                                            modelScores[selectedGranite === model?.model?.name ? selectedOther : selectedGranite]?.split(":")[0]?.trim() || '0'
+                                                        )
+                                                        ? 'red' // Current model has a lower score
+                                                        : 'cyan' // Scores are equal
+                                                    : 'outline' // Default color if scores are not available
                                             }>
                                                 {(() => {
                                                     const modelName = model?.model?.name?.trim();
-                                                    const scoreEntry = Object.entries(modelScores).find(([key]) => key.toLowerCase().includes(modelName?.toLowerCase() || ''));
+                                                    const normalizedModelName = normalizeGraniteModelName(modelName || '');
+                                                    const scoreEntry = Object.entries(modelScores).find(([key]) => key.toLowerCase().includes(normalizedModelName.toLowerCase()));
                                                     if (scoreEntry) {
                                                         const rawScore = scoreEntry[1]?.split(":")[0]?.trim();
                                                         const formattedScore = rawScore ? (parseFloat(rawScore) / 100).toFixed(2) + "%" : "N/A";
@@ -1023,8 +1089,7 @@ const ModelComparison = () => {
                                                     }
                                                     return "N/A";
                                                 })()}
-                                            </Tag>
-                                            
+                                            </Tag> */}
                                         </div>
 
                                         <div className="time-taken-wrap">
