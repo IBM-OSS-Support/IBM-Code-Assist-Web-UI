@@ -346,39 +346,58 @@
       }
     }
   }
+  .response-time {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-top: 0.5rem;
+  }
+
+  .information-wrap {
+    padding: 1rem 2.4rem;
+    margin-inline-start: 0 !important;
+    margin-top: 2rem;
+    border: 1px solid #aaaaaa;
+    border-radius: 4px;
+
+    h4 {
+        margin: 0 0 1rem 0;
+        font-size: 2rem;
+        font-weight: 600;
+        color: #ffffff;
+        text-align: center;
+    }
+
+    .cds--list__item {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        &::before {
+            font-weight: bold;
+        }
+    }
+    .ribbon {
+      .ribbon4 {
+        position: relative;
+        top: initial;
+        left: initial;
+        margin: 0 0.4rem;
+      }
+    }
+  }
 }
-// .flatpickr-calendar.open {
-//     inline-size: 23.5rem !important;
-// }
 .ribbon {
   position: relative;
 
   .ribbon4 {
     position: absolute;
-    top: 15px;
-    padding: 8px 10px;
-    background: #015d01;
-    box-shadow: -1px 2px 3px rgba(0,0,0,.3);
+    top: -1.85rem;
+    left: -0.5rem;
+    padding: 5px;
+    background: #015d0191;
+    box-shadow: -1px 2px 3px rgba(0, 0, 0, 0.3);
+    font-size: 0.75rem;
+    border-radius: 4px 4px 0 0;
   }
-  .ribbon4:before, .ribbon4:after {
-    content: "";
-    position: absolute;
-  }
-  .ribbon4:before {
-    width: 7px;
-    height: 100%;
-    top: 0;
-    left: -6.5px;
-    padding: 0 0 7px;
-    background: inherit;
-    border-radius: 5px 0 0 5px;
-  }
-  .ribbon4:after {
-    width: 5px;
-    height: 5px;
-    bottom: -5px;
-    left: -4.5px;
-    background: #a5f3a5;
-    border-radius: 5px 0 0 5px;
-   }
 }
