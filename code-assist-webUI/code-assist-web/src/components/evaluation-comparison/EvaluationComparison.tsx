@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicker, DatePickerInput, RadioButton, RadioButtonGroup, Tag, Dropdown, CodeSnippet, Tooltip, Loading, Modal, Tile, CodeSnippetSkeleton, ButtonSkeleton, DropdownSkeleton, OrderedList, ListItem } from "@carbon/react";
+import { Column, Grid, ComboBox, Button, Checkbox, DatePickerSkeleton, DatePicker, DatePickerInput, RadioButton, RadioButtonGroup, Tag, Dropdown, CodeSnippet, Tooltip, Loading, Modal, Tile, CodeSnippetSkeleton, ButtonSkeleton, DropdownSkeleton, OrderedList, ListItem, ProgressBar } from "@carbon/react";
 import "./_EvaluationComparison.scss";
 import { format, isValid, parse } from "date-fns";
-import { Alarm, Download, FilterRemove, FilterReset, FlashFilled, Help, Hourglass } from "@carbon/react/icons";
+import { Alarm, Close, Download, FilterRemove, FilterReset, FlashFilled, Help, Hourglass } from "@carbon/react/icons";
 import { se } from "date-fns/locale";
 
 
@@ -53,6 +53,10 @@ const ModelComparison = () => {
     const [logContent, setLogContent] = useState<string | null>(null);
     const [logSummary, setLogSummary] = useState<Record<string, string>>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDownloadingLog, setIsDownloadingLog] = useState(false);
+    const [downloadedLogFile, setDownloadedLogFile] = useState<string | null>(null);
+    const [progress, setProgress] = useState(0);
+    const [progressSize, setProgressSize] = useState(728); // dummy "size"
 
     // Modified backend URL detection with GitHub fallback
     const getBackendURL = () => {
@@ -516,44 +520,62 @@ const ModelComparison = () => {
         return extracted;
     };
 
-    const fetchLogFiles = async (promptText: string) => {
+    const fetchLogFiles = async (modelFileName: string) => {
         try {
-            const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
-            const response = await fetch(logsJsonUrl);
-            if (!response.ok) throw new Error("Failed to fetch log files");
-            const files: string[] = await response.json();
-    
-            const matchingFiles: LogFile[] = [];
-    
-            for (const file of files) {
-                const fileNameWithoutLogs = file.replace("logs/", "");
-                const logFileUrl = `${GITHUB_LOG_URL}/${fileNameWithoutLogs}`;
-                const logResponse = await fetch(logFileUrl);
-                if (!logResponse.ok) continue;
-    
-                const logContent = await logResponse.text();
-                if (logContent.includes(promptText)) {
-                    const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
-                    const { formatted, raw } = match ? formatDate(match[1]) : { formatted: "Unknown Date", raw: "0" };
-                    matchingFiles.push({ name: fileNameWithoutLogs, date: formatted, rawDate: raw });
-                }
-            }
-    
-            const sortedFiles = matchingFiles.sort((a, b) =>
-                new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
+          const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
+          const response = await fetch(logsJsonUrl);
+          if (!response.ok) throw new Error("Failed to fetch log files");
+          const files: string[] = await response.json();
+      
+          // Extract model name from filename and split into search terms
+          const parsed = parseFileName(modelFileName);
+          const searchTerms = parsed.modelName
+            .toLowerCase()
+            .split(/[:-_]/) // Split on colons, hyphens, and underscores
+            .filter(term => term.length > 0);
+      
+          const matchingFiles: LogFile[] = [];
+      
+          for (const file of files) {
+            const fileNameWithoutLogs = file.replace("logs/", "");
+            const lowerFileName = fileNameWithoutLogs.toLowerCase();
+      
+            // Check if all search terms exist in filename
+            const allTermsFound = searchTerms.every(term => 
+              lowerFileName.includes(term)
             );
-    
-            setLogFiles(sortedFiles);
+      
+            if (allTermsFound) {
+              const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
+              const { formatted, raw } = match ? formatDate(match[1]) : { 
+                formatted: "Unknown Date", 
+                raw: "0" 
+              };
+              matchingFiles.push({ 
+                name: fileNameWithoutLogs, 
+                date: formatted, 
+                rawDate: raw 
+              });
+            }
+          }
+      
+          const sortedFiles = matchingFiles.sort((a, b) =>
+            new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
+          );
+      
+          setLogFiles(sortedFiles);
         } catch (error) {
-            console.error("Error fetching log files:", error);
+          console.error("Error fetching log files:", error);
+          setLogFiles([]);
         }
-    };
+    };      
 
     const fetchLogContent = async (fileName: string) => {
         try {
-            setIsLoading(true);
+            setProgress(0);
+            setDownloadedLogFile(null);
+            setIsDownloadingLog(true);
             setSelectedLog(fileName);
-            setIsModalOpen(true);
     
             const logFileUrl = `${GITHUB_LOG_URL}/${fileName}`;
             const response = await fetch(logFileUrl);
@@ -563,14 +585,29 @@ const ModelComparison = () => {
             setLogContent(content);
             const summary = extractLogValues(content);
             setLogSummary(summary);
+    
+            // Animate progress
+            const interval = setInterval(() => {
+                setProgress((prev) => {
+                    const advance = Math.random() * 20;
+                    if (prev + advance < progressSize) {
+                        return prev + advance;
+                    } else {
+                        clearInterval(interval);
+                        setIsDownloadingLog(false);
+                        setDownloadedLogFile(fileName);
+                        setIsModalOpen(true); // open modal when done
+                        return progressSize;
+                    }
+                });
+            }, 50);
         } catch (error) {
             console.error("Error fetching log content:", error);
             setLogContent("⚠️ Failed to load content.");
             setLogSummary({});
-        } finally {
-            setIsLoading(false);
+            setIsDownloadingLog(false);
         }
-    };
+    };    
     
     const downloadLog = (format: "json" | "csv" | "log") => {
         if (!selectedLog || !logContent) return;
@@ -1235,7 +1272,7 @@ const ModelComparison = () => {
                                                         />
                                                     </Column>
                                                     <Column lg={8} md={8} sm={4}>
-                                                        {selectedQuestions[`${model?.model?.name}-${index}`] !== "All" && (
+                                                        {/* {selectedQuestions[`${model?.model?.name}-${index}`] !== "All" && (
                                                             <>
                                                                 {selectedQuestions[`${model?.model?.name}-${index}`] && (
                                                                     isLoading || logFiles.length === 0 ? (
@@ -1259,6 +1296,89 @@ const ModelComparison = () => {
                                                                     )
                                                                 )}
                                                             </>
+                                                        )} */}
+                                                        {selectedQuestions[`${model?.model?.name}-${index}`] !== "All" && (
+                                                            <div style={{ marginTop: "1rem" }}>
+                                                                {isLoading ? (
+                                                                <div className="skeleton-wrap">
+                                                                    <DropdownSkeleton />
+                                                                </div>
+                                                                ) : (
+                                                                <>
+                                                                    {logFiles.length > 0 ? (
+                                                                    <>
+                                                                        {!isDownloadingLog && !downloadedLogFile && (
+                                                                        <Dropdown
+                                                                            id="log-dropdown"
+                                                                            className="log-combo-box"
+                                                                            titleText="Related Log Files"
+                                                                            label="Choose a Log File"
+                                                                            items={logFiles}
+                                                                            itemToString={(item) => item?.name || ""}
+                                                                            onChange={({ selectedItem }) => {
+                                                                            if (selectedItem) {
+                                                                                fetchLogContent(selectedItem.name);
+                                                                            }
+                                                                            }}
+                                                                        />
+                                                                        )}
+
+                                                                        {isDownloadingLog && (
+                                                                        <div style={{ marginTop: "1rem" }}>
+                                                                            <ProgressBar
+                                                                            label="Downloading Log File"
+                                                                            value={progress}
+                                                                            max={progressSize}
+                                                                            status={progress >= progressSize ? 'finished' : 'active'}
+                                                                            helperText={
+                                                                                progress === 0
+                                                                                ? 'Initializing download...'
+                                                                                : progress >= progressSize
+                                                                                ? 'Download complete'
+                                                                                : `${Math.round((progress / progressSize) * 100)}% downloaded`
+                                                                            }
+                                                                            />
+                                                                        </div>
+                                                                        )}
+
+                                                                        {!isDownloadingLog && downloadedLogFile && (
+                                                                        <div className="download-log-wrap">
+                                                                            <h5>Downloaded:</h5>
+                                                                            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                                                                            <p style={{ margin: 0, fontWeight: 500 }}>
+                                                                                {downloadedLogFile}
+                                                                                <Close 
+                                                                                size={16} 
+                                                                                style={{ marginLeft: "0.5rem", cursor: "pointer" }} 
+                                                                                onClick={() => {
+                                                                                    setDownloadedLogFile(null);
+                                                                                    setSelectedLog(null);
+                                                                                    setLogContent(null);
+                                                                                    setLogSummary({});
+                                                                                    setProgress(0);
+                                                                                }}
+                                                                                />
+                                                                            </p>
+                                                                            <Button kind="ghost" size="sm" onClick={() => setIsModalOpen(true)}>
+                                                                                View File
+                                                                            </Button>
+                                                                            <Button kind="ghost" size="sm" onClick={() => downloadLog("log")}>
+                                                                                Download
+                                                                            </Button>
+                                                                            </div>
+                                                                        </div>
+                                                                        )}
+                                                                    </>
+                                                                    ) : (
+                                                                    <div className="no-logs-message">
+                                                                        <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500, display: "flex", alignItems: "center" }}>
+                                                                            No log files found matching this model..
+                                                                        </p>
+                                                                    </div>
+                                                                    )}
+                                                                </>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </Column>
                                                 </Grid>

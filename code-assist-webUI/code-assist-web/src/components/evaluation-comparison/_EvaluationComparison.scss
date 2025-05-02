@@ -386,6 +386,14 @@
       }
     }
   }
+  .download-log-wrap {
+    .close-icon {
+      &:hover {
+        cursor: pointer;
+        color: #a2191f;
+      }
+    }
+  }
 }
 .ribbon {
   position: relative;

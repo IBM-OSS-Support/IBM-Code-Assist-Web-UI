@@ -5,16 +5,11 @@
   "logs/ollama_server_20250424_222026.log",
   "logs/ollama_server_20250424_215653.log",
   "logs/ollama_server_20250424_210407.log",
-  "logs/ollama_server_20250424_133222.log",
-  "logs/ollama_server_20250424_123851.log",
-  "logs/ollama_server_20250424_123512.log",
-  "logs/ollama_server_20250424_123014.log",
-  "logs/ollama_server_20250424_122624.log",
-  "logs/ollama_server_20250424_122525.log",
   "logs/ollama_server_20250403_215501.log",
   "logs/ollama_server_20250403_215141.log",
   "logs/ollama_server_20250403_214658.log",
   "logs/ollama_server_20250403_210419.log",
   "logs/ollama_server_20250403_205130.log",
-  "logs/ollama_server_20250403_204454.log"
+  "logs/ollama_server_20250403_204454.log",
+  "logs/granite-code:8b-instruct-ollama_server_20250502_160508.log"
 ]
