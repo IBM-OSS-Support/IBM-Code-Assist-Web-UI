@@ -562,7 +562,7 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
 
     const fetchLogContent = async (fileName: string, resultKey: string) => {
         try {
-            setProgress(0);
+            setProgress(0); // Reset progress
             setDownloadedLogFileByModel((prev) => ({
                 ...prev,
                 [resultKey]: null,
@@ -596,7 +596,7 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
             // Animate progress
             const interval = setInterval(() => {
                 setProgress((prev) => {
-                    const advance = Math.random() * 20;
+                    const advance = Math.random() * 10; // Simulate progress increment
                     if (prev + advance < fileSizeInKB) {
                         return prev + advance;
                     } else {
@@ -609,11 +609,10 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
                             ...prev,
                             [resultKey]: fileName,
                         }));
-                        setIsModalOpen(true); // Open modal when done
                         return fileSizeInKB;
                     }
                 });
-            }, 50);
+            }, 500); // Update every 500ms
         } catch (error) {
             console.error("Error fetching log content:", error);
             setLogContent("⚠️ Failed to load content.");
@@ -1298,7 +1297,7 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
                                                             label="Choose a question"
                                                         />
                                                     </Column>
-                                                    <Column lg={16} md={8} sm={4}>
+                                                    {/* <Column lg={8} md={8} sm={4}> */}
                                                         {/* {selectedQuestions[`${model?.model?.name}-${index}`] !== "All" && (
                                                             <>
                                                                 {selectedQuestions[`${model?.model?.name}-${index}`] && (
@@ -1328,82 +1327,93 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
                                                             <>
                                                                 {
                                                                     isLoading || !logFilesByModel[resultKey] ? (
-                                                                        <div className="skeleton-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "1rem 0 0" }}>
-                                                                            <DropdownSkeleton />
-                                                                        </div>
+                                                                        <Column lg={8} md={8} sm={4}>
+                                                                            <div className="skeleton-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "1rem 0 0" }}>
+                                                                                <DropdownSkeleton />
+                                                                            </div>
+                                                                        </Column>
                                                                     ) : logFilesByModel[resultKey]?.length === 0 ? (
-                                                                        <div style={{ margin: "1rem 0", color: "#999" }}>
-                                                                            No log files available.
-                                                                        </div>
+                                                                        <Column lg={8} md={8} sm={4}>
+                                                                            <div style={{ margin: "1rem 0", color: "#999" }}>
+                                                                                No log files available.
+                                                                            </div>
+                                                                        </Column>
                                                                     ) : (
                                                                         <>
-                                                                            {!isDownloadingLogByModel[resultKey] && !downloadedLogFileByModel[resultKey] && (
-                                                                                <Dropdown
-                                                                                id="log-dropdown"
-                                                                                className="log-combo-box"
-                                                                                titleText="Select a Log File"
-                                                                                label="Choose a Log File"
-                                                                                items={logFilesByModel[resultKey] || []}
-                                                                                itemToString={(item) => {
-                                                                                    if (!item) return "";
-                                                                                    return item.name.replace(/^logs\//, ""); // Remove "logs/" prefix
-                                                                                }}
-                                                                                onChange={({ selectedItem }) => {
-                                                                                    if (selectedItem) {
-                                                                                        fetchLogContent(selectedItem.name.replace(/^logs\//, ""), resultKey);
-                                                                                    }
-                                                                                }}
-                                                                                />
-                                                                            )}
-
-                                                                            {isDownloadingLogByModel[resultKey] && (
-                                                                                <div style={{ marginTop: "1rem" }}>
-                                                                                    <ProgressBar
-                                                                                        label="Downloading Log File"
-                                                                                        value={progress}
-                                                                                        max={progressSize}
-                                                                                        status={progress >= progressSize ? "finished" : "active"}
-                                                                                        helperText={
-                                                                                            progress === 0
-                                                                                                ? "Fetching log..."
-                                                                                                : progress >= progressSize
-                                                                                                ? "Download complete"
-                                                                                                : `${progress.toFixed(1)}KB of ${progressSize}KB`
+                                                                            <Column lg={8} md={8} sm={4}>
+                                                                                {!isDownloadingLogByModel[resultKey] && !downloadedLogFileByModel[resultKey] && (
+                                                                                    <Dropdown
+                                                                                    id="log-dropdown"
+                                                                                    className="log-combo-box"
+                                                                                    titleText="Select a Log File"
+                                                                                    label="Choose a Log File"
+                                                                                    items={logFilesByModel[resultKey] || []}
+                                                                                    itemToString={(item) => {
+                                                                                        if (!item) return "";
+                                                                                        return item.name.replace(/^logs\//, ""); // Remove "logs/" prefix
+                                                                                    }}
+                                                                                    onChange={({ selectedItem }) => {
+                                                                                        if (selectedItem) {
+                                                                                            fetchLogContent(selectedItem.name.replace(/^logs\//, ""), resultKey);
                                                                                         }
+                                                                                    }}
                                                                                     />
-                                                                                </div>
-                                                                            )}
+                                                                                )}
 
+                                                                                {isDownloadingLogByModel[resultKey] && (
+                                                                                    <div style={{ marginTop: "1rem" }}>
+                                                                                        <ProgressBar
+                                                                                            label="Downloading Log File"
+                                                                                            value={progress}
+                                                                                            max={progressSize}
+                                                                                            status={progress >= progressSize ? "finished" : "active"}
+                                                                                            helperText={
+                                                                                                progress === 0
+                                                                                                    ? "Fetching log..."
+                                                                                                    : progress >= progressSize
+                                                                                                    ? "Download complete"
+                                                                                                    : `${progress.toFixed(1)}KB of ${progressSize}KB`
+                                                                                            }
+                                                                                        />
+                                                                                    </div>
+                                                                                )}
+                                                                            </Column>
+                                                                            
+                                                                            <Column lg={16} md={8} sm={4}>
                                                                             {!isDownloadingLogByModel[resultKey] && downloadedLogFileByModel[resultKey] && (
                                                                                 <div className="download-log-wrap" style={{ marginTop: "1rem", display: "flex", alignItems: "flex-start", flexDirection: "column" }}>
                                                                                     <h5>Downloaded:</h5>
                                                                                     <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                                                                                         <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: 500, display: "flex", alignItems: "center" }}>
-                                                                                            {downloadedLogFileByModel[resultKey]} 
-                                                                                                <Close 
-                                                                                                    className="close-icon"
-                                                                                                    size={22} 
-                                                                                                    style={{ marginLeft: "0.5rem", cursor: "pointer" }} 
-                                                                                                    onClick={() => {
-                                                                                                        setDownloadedLogFile(null);
-                                                                                                        setSelectedLog(null);
-                                                                                                        setLogContent(null);
-                                                                                                        setLogSummary({});
-                                                                                                        setProgress(0);
-                                                                                                    }}
-                                                                                                />
+                                                                                            {downloadedLogFileByModel[resultKey]}
+                                                                                            <Close
+                                                                                                className="close-icon"
+                                                                                                size={22}
+                                                                                                style={{ marginLeft: "0.5rem", cursor: "pointer" }}
+                                                                                                onClick={() => {
+                                                                                                    setDownloadedLogFileByModel((prev) => ({
+                                                                                                        ...prev,
+                                                                                                        [resultKey]: null, // Clear the downloaded file for the specific resultKey
+                                                                                                    }));
+                                                                                                    setSelectedLog(null); // Clear the selected log
+                                                                                                    setLogContent(null); // Clear the log content
+                                                                                                    setLogSummary({}); // Clear the log summary
+                                                                                                    setProgress(0); // Reset the progress
+                                                                                                }}
+                                                                                            />
                                                                                         </p>
                                                                                         <Button kind="ghost" size="sm" onClick={() => setIsModalOpen(true)}>View File</Button>
                                                                                         <Button kind="ghost" size="sm" onClick={() => downloadLog("log")}>Download</Button>
                                                                                     </div>
                                                                                 </div>
                                                                             )}
+                                                                            </Column>
                                                                         </>
                                                                     )
                                                                 }
                                                             </>
                                                         )}
-                                                    </Column>
+                                                     {/* </Column> */}
                                                 </Grid>
                                             </div>
                                             <p>

@@ -1,17 +1,5 @@
 [
-  "logs/ollama_server_20250429_103108.log",
-  "logs/ollama_server_20250425_115039.log",
-  "logs/ollama_server_20250425_093131.log",
-  "logs/ollama_server_20250424_222026.log",
-  "logs/ollama_server_20250424_215653.log",
-  "logs/ollama_server_20250424_210407.log",
-  "logs/ollama_server_20250403_215501.log",
-  "logs/ollama_server_20250403_215141.log",
-  "logs/ollama_server_20250403_214658.log",
-  "logs/ollama_server_20250403_210419.log",
-  "logs/ollama_server_20250403_205130.log",
-  "logs/ollama_server_20250403_204454.log",
-  "logs/granite-code:8b-instruct_ollama_server_20250502_160508.log.log",
+  "logs/granite-code:8b-instruct_ollama_server_20250502_160508.log",
   "logs/granite-code:3b-instruct_ollama_server_20250505_113808.log",
   "logs/gpt-4o_ollama_server_20250505_114548.log"
 ]
