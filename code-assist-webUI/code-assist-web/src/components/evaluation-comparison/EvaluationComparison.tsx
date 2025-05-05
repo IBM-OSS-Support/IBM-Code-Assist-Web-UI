@@ -15,7 +15,7 @@ const GITHUB_LOG_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/IBM
 
 interface Model {
     name: string;
-    created_at: string;
+    date: string;
     file_name: string;
     total_time: string
     prompt: { user: string; assistant: string; }[];
@@ -56,7 +56,10 @@ const ModelComparison = () => {
     const [isDownloadingLog, setIsDownloadingLog] = useState(false);
     const [downloadedLogFile, setDownloadedLogFile] = useState<string | null>(null);
     const [progress, setProgress] = useState(0);
-    const [progressSize, setProgressSize] = useState(728); // dummy "size"
+    const [progressSize, setProgressSize] = useState(728); // Default size in KB
+    const [logFilesByModel, setLogFilesByModel] = useState<{ [key: string]: LogFile[] }>({});
+const [isDownloadingLogByModel, setIsDownloadingLogByModel] = useState<{ [key: string]: boolean }>({});
+const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key: string]: string | null }>({});
 
     // Modified backend URL detection with GitHub fallback
     const getBackendURL = () => {
@@ -461,7 +464,7 @@ const ModelComparison = () => {
     //                 if (parsedFile) {
     //                     const prompts = model.prompt.filter((prompt: { user: string; assistant: string }) => {
     //                         const promptDate = parsedFile.timestamp.substring(0, 8); // Extract date from the selected file
-    //                         const createdAtDate = model.created_at.substring(0, 8); // Extract date from the model's created_at
+    //                         const createdAtDate = model.date.substring(0, 8); // Extract date from the model's date
     //                         return promptDate === createdAtDate;
     //                     });
     
@@ -520,67 +523,71 @@ const ModelComparison = () => {
         return extracted;
     };
 
-    const fetchLogFiles = async (modelFileName: string) => {
+    const fetchLogFiles = async (resultFileName: string, resultKey: string) => {
         try {
-          const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
-          const response = await fetch(logsJsonUrl);
-          if (!response.ok) throw new Error("Failed to fetch log files");
-          const files: string[] = await response.json();
-      
-          // Extract model name from filename and split into search terms
-          const parsed = parseFileName(modelFileName);
-          const searchTerms = parsed.modelName
-            .toLowerCase()
-            .split(/[:-_]/) // Split on colons, hyphens, and underscores
-            .filter(term => term.length > 0);
-      
-          const matchingFiles: LogFile[] = [];
-      
-          for (const file of files) {
-            const fileNameWithoutLogs = file.replace("logs/", "");
-            const lowerFileName = fileNameWithoutLogs.toLowerCase();
-      
-            // Check if all search terms exist in filename
-            const allTermsFound = searchTerms.every(term => 
-              lowerFileName.includes(term)
+            console.log("Fetching log files for:", resultFileName); // Debugging
+            const logsJsonUrl = `${GITHUB_LOG_URL}/logs.json`;
+            const response = await fetch(logsJsonUrl);
+            if (!response.ok) throw new Error("Failed to fetch log files");
+            const files: string[] = await response.json();
+    
+            // Extract the model name from the result file name
+            const modelName = resultFileName.split("_")[0];
+            console.log("Extracted model name:", modelName); // Debugging
+    
+            // Filter files based on the model name and format
+            const matchingFiles: LogFile[] = files
+                .filter(file => file.includes(modelName) && file.match(`${modelName}_ollama_server_\\d{8}_\\d{6}\\.log`))
+                .map(file => {
+                    const match = file.match(/_(\d{8}_\d{6})/);
+                    const { formatted, raw } = match ? formatDate(match[1]) : { formatted: "Unknown Date", raw: "0" };
+                    return { name: file, date: formatted, rawDate: raw };
+                });
+    
+            console.log("Matching log files:", matchingFiles); // Debugging
+    
+            // Sort files by date (newest first)
+            const sortedFiles = matchingFiles.sort((a, b) =>
+                new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
             );
-      
-            if (allTermsFound) {
-              const match = fileNameWithoutLogs.match(/_(\d{8}_\d{6})/);
-              const { formatted, raw } = match ? formatDate(match[1]) : { 
-                formatted: "Unknown Date", 
-                raw: "0" 
-              };
-              matchingFiles.push({ 
-                name: fileNameWithoutLogs, 
-                date: formatted, 
-                rawDate: raw 
-              });
-            }
-          }
-      
-          const sortedFiles = matchingFiles.sort((a, b) =>
-            new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
-          );
-      
-          setLogFiles(sortedFiles);
+    
+            setLogFilesByModel((prev) => ({
+                ...prev,
+                [resultKey]: sortedFiles,
+            }));
         } catch (error) {
-          console.error("Error fetching log files:", error);
-          setLogFiles([]);
+            console.error("Error fetching log files:", error);
         }
-    };      
+    };
 
-    const fetchLogContent = async (fileName: string) => {
+    const fetchLogContent = async (fileName: string, resultKey: string) => {
         try {
             setProgress(0);
-            setDownloadedLogFile(null);
-            setIsDownloadingLog(true);
+            setDownloadedLogFileByModel((prev) => ({
+                ...prev,
+                [resultKey]: null,
+            }));
+            setIsDownloadingLogByModel((prev) => ({
+                ...prev,
+                [resultKey]: true,
+            }));
             setSelectedLog(fileName);
     
             const logFileUrl = `${GITHUB_LOG_URL}/${fileName}`;
-            const response = await fetch(logFileUrl);
-            if (!response.ok) throw new Error("Failed to fetch log content");
-            const content = await response.text();
+            console.log("Fetching log file from URL:", logFileUrl); // Debugging
+    
+            const response = await fetch(logFileUrl, { method: "HEAD" });
+            if (!response.ok) throw new Error("Failed to fetch log file metadata");
+    
+            // Get the file size from the Content-Length header
+            const contentLength = response.headers.get("Content-Length");
+            const fileSizeInKB = contentLength ? Math.ceil(Number(contentLength) / 1024) : 728; // Default to 728 KB if unavailable
+            setProgressSize(fileSizeInKB);
+    
+            // Fetch the actual file content
+            const fileResponse = await fetch(logFileUrl);
+            if (!fileResponse.ok) throw new Error("Failed to fetch log content");
+            const content = await fileResponse.text();
     
             setLogContent(content);
             const summary = extractLogValues(content);
@@ -590,14 +597,20 @@ const ModelComparison = () => {
             const interval = setInterval(() => {
                 setProgress((prev) => {
                     const advance = Math.random() * 20;
-                    if (prev + advance < progressSize) {
+                    if (prev + advance < fileSizeInKB) {
                         return prev + advance;
                     } else {
                         clearInterval(interval);
-                        setIsDownloadingLog(false);
-                        setDownloadedLogFile(fileName);
-                        setIsModalOpen(true); // open modal when done
-                        return progressSize;
+                        setIsDownloadingLogByModel((prev) => ({
+                            ...prev,
+                            [resultKey]: false,
+                        }));
+                        setDownloadedLogFileByModel((prev) => ({
+                            ...prev,
+                            [resultKey]: fileName,
+                        }));
+                        setIsModalOpen(true); // Open modal when done
+                        return fileSizeInKB;
                     }
                 });
             }, 50);
@@ -605,9 +618,21 @@ const ModelComparison = () => {
             console.error("Error fetching log content:", error);
             setLogContent("⚠️ Failed to load content.");
             setLogSummary({});
-            setIsDownloadingLog(false);
+            setIsDownloadingLogByModel((prev) => ({
+                ...prev,
+                [resultKey]: false,
+            }));
         }
-    };    
+    };
+
+    useEffect(() => {
+        Object.entries(selectedResults).forEach(([resultKey, selectedFileName]) => {
+            if (selectedFileName) {
+                console.log(`Fetching log files for pre-populated result: ${selectedFileName}`);
+                fetchLogFiles(selectedFileName, resultKey);
+            }
+        });
+    }, [selectedResults]);
     
     const downloadLog = (format: "json" | "csv" | "log") => {
         if (!selectedLog || !logContent) return;
@@ -975,12 +1000,12 @@ const ModelComparison = () => {
                                                 return true;
                                             }
 
-                                            const createdAtDate = model?.model?.created_at ? new Date(
-                                                Number(model?.model?.created_at.substring(0, 4)),
-                                                Number(model?.model?.created_at.substring(4, 6)) - 1,
-                                                Number(model?.model?.created_at.substring(6, 8)),
-                                                Number(model?.model?.created_at.substring(9, 11)),
-                                                Number(model?.model?.created_at.substring(11, 13))
+                                            const createdAtDate = model?.model?.date ? new Date(
+                                                Number(model?.model?.date.substring(0, 4)),
+                                                Number(model?.model?.date.substring(4, 6)) - 1,
+                                                Number(model?.model?.date.substring(6, 8)),
+                                                Number(model?.model?.date.substring(9, 11)),
+                                                Number(model?.model?.date.substring(11, 13))
                                             ) : null;
 
                                             console.log(`filteredPrompts -- createdAtDate for ${model?.model?.name}:`, createdAtDate);
@@ -1017,7 +1042,7 @@ const ModelComparison = () => {
                                                 const prompts = model.prompt.filter((prompt: { user: string; assistant: string }) => {
                                                     // Match the selected file's timestamp with the prompt's creation date
                                                     const promptDate = parsedFile.timestamp.substring(0, 8); // Extract date from the selected file
-                                                    const createdAtDate = model.created_at.substring(0, 8); // Extract date from the model's created_at
+                                                    const createdAtDate = model.date.substring(0, 8); // Extract date from the model's date
                                                     return promptDate === createdAtDate;
                                                 });
 
@@ -1034,7 +1059,7 @@ const ModelComparison = () => {
 
                                     // Assuming you have access to the prompt's creation date (string or Date)
                                     // Grab the raw date
-                                    const promptCreateRaw = model?.model?.created_at;
+                                    const promptCreateRaw = model?.model?.date;
 
                                     // Convert safely to a Date object
                                     const parsedDate = promptCreateRaw
@@ -1237,6 +1262,9 @@ const ModelComparison = () => {
                                                                     ...prev,
                                                                     [resultKey]: filteredPrompts, // Make this unique too
                                                                 }));
+
+                                                                console.log(selectedResults, "Selected result file name:", selectedFileName);
+                                                                fetchLogFiles(selectedFileName, resultKey); // Fetch log files for the specific model
                                                             
                                                                 console.log(`Filtered Prompts for ${resultKey}:`, filteredPrompts);
                                                             }}                                                        
@@ -1263,15 +1291,15 @@ const ModelComparison = () => {
                                                                 }));
                                                         
                                                                 // Extract the prompt text from the selected question
-                                                                const promptText = selectedItem?.split(": ")[1] || "";
-                                                                fetchLogFiles(promptText); // Fetch log files matching the prompt text
+                                                                // const promptText = selectedItem?.split(": ")[1] || "";
+                                                                // fetchLogFiles(promptText); // Fetch log files matching the prompt text
                                                             }}
                                                             selectedItem={selectedQuestion}
                                                             titleText="Select a Question"
                                                             label="Choose a question"
                                                         />
                                                     </Column>
-                                                    <Column lg={8} md={8} sm={4}>
+                                                    <Column lg={16} md={8} sm={4}>
                                                         {/* {selectedQuestions[`${model?.model?.name}-${index}`] !== "All" && (
                                                             <>
                                                                 {selectedQuestions[`${model?.model?.name}-${index}`] && (
@@ -1297,88 +1325,84 @@ const ModelComparison = () => {
                                                                 )}
                                                             </>
                                                         )} */}
-                                                        {selectedQuestions[`${model?.model?.name}-${index}`] !== "All" && (
-                                                            <div style={{ marginTop: "1rem" }}>
-                                                                {isLoading ? (
-                                                                <div className="skeleton-wrap">
-                                                                    <DropdownSkeleton />
-                                                                </div>
-                                                                ) : (
-                                                                <>
-                                                                    {logFiles.length > 0 ? (
-                                                                    <>
-                                                                        {!isDownloadingLog && !downloadedLogFile && (
-                                                                        <Dropdown
-                                                                            id="log-dropdown"
-                                                                            className="log-combo-box"
-                                                                            titleText="Related Log Files"
-                                                                            label="Choose a Log File"
-                                                                            items={logFiles}
-                                                                            itemToString={(item) => item?.name || ""}
-                                                                            onChange={({ selectedItem }) => {
-                                                                            if (selectedItem) {
-                                                                                fetchLogContent(selectedItem.name);
-                                                                            }
-                                                                            }}
-                                                                        />
-                                                                        )}
-
-                                                                        {isDownloadingLog && (
-                                                                        <div style={{ marginTop: "1rem" }}>
-                                                                            <ProgressBar
-                                                                            label="Downloading Log File"
-                                                                            value={progress}
-                                                                            max={progressSize}
-                                                                            status={progress >= progressSize ? 'finished' : 'active'}
-                                                                            helperText={
-                                                                                progress === 0
-                                                                                ? 'Initializing download...'
-                                                                                : progress >= progressSize
-                                                                                ? 'Download complete'
-                                                                                : `${Math.round((progress / progressSize) * 100)}% downloaded`
-                                                                            }
-                                                                            />
+                                                        {selectedResults[`${model?.model?.name}-${index}`] && (
+                                                            <>
+                                                                {
+                                                                    isLoading || !logFilesByModel[resultKey] ? (
+                                                                        <div className="skeleton-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "1rem 0 0" }}>
+                                                                            <DropdownSkeleton />
                                                                         </div>
-                                                                        )}
-
-                                                                        {!isDownloadingLog && downloadedLogFile && (
-                                                                        <div className="download-log-wrap">
-                                                                            <h5>Downloaded:</h5>
-                                                                            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                                                                            <p style={{ margin: 0, fontWeight: 500 }}>
-                                                                                {downloadedLogFile}
-                                                                                <Close 
-                                                                                size={16} 
-                                                                                style={{ marginLeft: "0.5rem", cursor: "pointer" }} 
-                                                                                onClick={() => {
-                                                                                    setDownloadedLogFile(null);
-                                                                                    setSelectedLog(null);
-                                                                                    setLogContent(null);
-                                                                                    setLogSummary({});
-                                                                                    setProgress(0);
+                                                                    ) : logFilesByModel[resultKey]?.length === 0 ? (
+                                                                        <div style={{ margin: "1rem 0", color: "#999" }}>
+                                                                            No log files available.
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            {!isDownloadingLogByModel[resultKey] && !downloadedLogFileByModel[resultKey] && (
+                                                                                <Dropdown
+                                                                                id="log-dropdown"
+                                                                                className="log-combo-box"
+                                                                                titleText="Select a Log File"
+                                                                                label="Choose a Log File"
+                                                                                items={logFilesByModel[resultKey] || []}
+                                                                                itemToString={(item) => {
+                                                                                    if (!item) return "";
+                                                                                    return item.name.replace(/^logs\//, ""); // Remove "logs/" prefix
+                                                                                }}
+                                                                                onChange={({ selectedItem }) => {
+                                                                                    if (selectedItem) {
+                                                                                        fetchLogContent(selectedItem.name.replace(/^logs\//, ""), resultKey);
+                                                                                    }
                                                                                 }}
                                                                                 />
-                                                                            </p>
-                                                                            <Button kind="ghost" size="sm" onClick={() => setIsModalOpen(true)}>
-                                                                                View File
-                                                                            </Button>
-                                                                            <Button kind="ghost" size="sm" onClick={() => downloadLog("log")}>
-                                                                                Download
-                                                                            </Button>
-                                                                            </div>
-                                                                        </div>
-                                                                        )}
-                                                                    </>
-                                                                    ) : (
-                                                                    <div className="no-logs-message">
-                                                                        <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500, display: "flex", alignItems: "center" }}>
-                                                                            No log files found matching this model..
-                                                                        </p>
-                                                                    </div>
-                                                                    )}
-                                                                </>
-                                                                )}
-                                                            </div>
+                                                                            )}
+
+                                                                            {isDownloadingLogByModel[resultKey] && (
+                                                                                <div style={{ marginTop: "1rem" }}>
+                                                                                    <ProgressBar
+                                                                                        label="Downloading Log File"
+                                                                                        value={progress}
+                                                                                        max={progressSize}
+                                                                                        status={progress >= progressSize ? "finished" : "active"}
+                                                                                        helperText={
+                                                                                            progress === 0
+                                                                                                ? "Fetching log..."
+                                                                                                : progress >= progressSize
+                                                                                                ? "Download complete"
+                                                                                                : `${progress.toFixed(1)}KB of ${progressSize}KB`
+                                                                                        }
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+
+                                                                            {!isDownloadingLogByModel[resultKey] && downloadedLogFileByModel[resultKey] && (
+                                                                                <div className="download-log-wrap" style={{ marginTop: "1rem", display: "flex", alignItems: "flex-start", flexDirection: "column" }}>
+                                                                                    <h5>Downloaded:</h5>
+                                                                                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                                                                                        <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: 500, display: "flex", alignItems: "center" }}>
+                                                                                            {downloadedLogFileByModel[resultKey]} 
+                                                                                                <Close 
+                                                                                                    className="close-icon"
+                                                                                                    size={22} 
+                                                                                                    style={{ marginLeft: "0.5rem", cursor: "pointer" }} 
+                                                                                                    onClick={() => {
+                                                                                                        setDownloadedLogFile(null);
+                                                                                                        setSelectedLog(null);
+                                                                                                        setLogContent(null);
+                                                                                                        setLogSummary({});
+                                                                                                        setProgress(0);
+                                                                                                    }}
+                                                                                                />
+                                                                                        </p>
+                                                                                        <Button kind="ghost" size="sm" onClick={() => setIsModalOpen(true)}>View File</Button>
+                                                                                        <Button kind="ghost" size="sm" onClick={() => downloadLog("log")}>Download</Button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+                                                                        </>
+                                                                    )
+                                                                }
+                                                            </>
                                                         )}
                                                     </Column>
                                                 </Grid>
@@ -1428,7 +1452,9 @@ const ModelComparison = () => {
                                                                         <strong>Assistant</strong>
                                                                         <span>{formatPromptWithCodeTags(prompt.assistant)}</span>
                                                                         <div className="response-time">
-                                                                            <Alarm />: {formatMillisecondsToTime(prompt.time)}
+                                                                            <span style={{ display: "flex" }} title="indicates time taken to complete that prompt (question)">
+                                                                                <Alarm />: {formatMillisecondsToTime(prompt.time)}
+                                                                            </span>
                                                                         </div>
                                                                     </div>
                                                                 </li>
@@ -1446,7 +1472,9 @@ const ModelComparison = () => {
                                                                             <strong>Assistant</strong>
                                                                             <span>{formatPromptWithCodeTags(prompt.assistant)}</span>
                                                                             <div className="response-time">
-                                                                                <Alarm />: {formatMillisecondsToTime(prompt.time)}
+                                                                                <span style={{ display: "flex" }} title="indicates time taken to complete that prompt (question)">
+                                                                                    <Alarm />: {formatMillisecondsToTime(prompt.time)}
+                                                                                </span>
                                                                             </div>
                                                                         </div>
                                                                     </li>
@@ -1519,7 +1547,7 @@ const ModelComparison = () => {
                                     <div style={{ margin: "1rem 0", display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
                                         <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("json")}>Download JSON</Button>{" "}
                                         <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("csv")}>Download CSV</Button>{" "}
-                                        <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("log")}>Download .log</Button>
+                                        {/* <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("log")}>Download .log</Button> */}
                                     </div>
                                     <Tile className="log-summary-tile">
                                         <h4>Log Summary</h4>
