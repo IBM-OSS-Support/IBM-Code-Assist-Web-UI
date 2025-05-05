@@ -1263,7 +1263,6 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
                                                                     [resultKey]: filteredPrompts, // Make this unique too
                                                                 }));
 
-                                                                console.log(selectedResults, "Selected result file name:", selectedFileName);
                                                                 fetchLogFiles(selectedFileName, resultKey); // Fetch log files for the specific model
                                                             
                                                                 console.log(`Filtered Prompts for ${resultKey}:`, filteredPrompts);
