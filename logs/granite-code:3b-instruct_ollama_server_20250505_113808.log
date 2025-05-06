@@ -26,10 +26,10 @@ llama_model_loader: loaded meta data with 33 key-value pairs and 578 tensors fro
 llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
 llama_model_loader: - kv   0:                       general.architecture str              = llama
 llama_model_loader: - kv   1:                               general.type str              = model
-llama_model_loader: - kv   2:                               general.name str              = Granite 8b Code Instruct 128k
+llama_model_loader: - kv   2:                               general.name str              = Granite 3b Code Instruct 128k
 llama_model_loader: - kv   3:                           general.finetune str              = code-instruct-128k
 llama_model_loader: - kv   4:                           general.basename str              = granite
-llama_model_loader: - kv   5:                         general.size_label str              = 8B
+llama_model_loader: - kv   5:                         general.size_label str              = 3B
 llama_model_loader: - kv   6:                            general.license str              = apache-2.0
 llama_model_loader: - kv   7:                               general.tags arr[str,3]       = ["code", "granite", "text-generation"]
 llama_model_loader: - kv   8:                           general.datasets arr[str,9]       = ["bigcode/commitpackft", "TIGER-Lab/M...
@@ -121,9 +121,9 @@ print_info: ssm_d_inner      = 0
 print_info: ssm_d_state      = 0
 print_info: ssm_dt_rank      = 0
 print_info: ssm_dt_b_c_rms   = 0
-print_info: model type       = 8B
-print_info: model params     = 8.05 B
-print_info: general.name     = Granite 8b Code Instruct 128k
+print_info: model type       = 3B
+print_info: model params     = 3.05 B
+print_info: general.name     = Granite 3b Code Instruct 128k
 print_info: vocab type       = BPE
 print_info: n_vocab          = 49152
 print_info: n_merges         = 48891
