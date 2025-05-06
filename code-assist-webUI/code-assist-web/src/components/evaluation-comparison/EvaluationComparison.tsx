@@ -52,14 +52,15 @@ const ModelComparison = () => {
     const [selectedLog, setSelectedLog] = useState<string | null>(null);
     const [logContent, setLogContent] = useState<string | null>(null);
     const [logSummary, setLogSummary] = useState<Record<string, string>>({});
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDownloadingLog, setIsDownloadingLog] = useState(false);
-    const [downloadedLogFile, setDownloadedLogFile] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState<string | null>(null);
+    const [logSummaryByModel, setLogSummaryByModel] = useState<{ [key: string]: Record<string, string> }>({});
     const [progress, setProgress] = useState(0);
     const [progressSize, setProgressSize] = useState(728); // Default size in KB
     const [logFilesByModel, setLogFilesByModel] = useState<{ [key: string]: LogFile[] }>({});
-const [isDownloadingLogByModel, setIsDownloadingLogByModel] = useState<{ [key: string]: boolean }>({});
-const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key: string]: string | null }>({});
+    const [isDownloadingLogByModel, setIsDownloadingLogByModel] = useState<{ [key: string]: boolean }>({});
+    const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key: string]: string | null }>({});
+    const [selectedLogByModel, setSelectedLogByModel] = useState<{ [key: string]: string | null }>({});
+    const [logContentByModel, setLogContentByModel] = useState<{ [key: string]: string | null }>({});
 
     // Modified backend URL detection with GitHub fallback
     const getBackendURL = () => {
@@ -501,25 +502,25 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
 
     const extractLogValues = (logText: string) => {
         const patterns = [
-          "general.basename str",
-          "llm_load_print_meta: general.name",
-          "llm_load_print_meta: model size",
-          "ggml_metal_init: found device",
-          "ggml_metal_init: GPU name",
-          "ggml_metal_init: recommendedMaxWorkingSetSize"
+            "general.basename str",
+            "llama_model_loader: - kv   2:                               general.name str",
+            "llm_load_print_meta: model size",
+            "ggml_metal_init: found device",
+            "ggml_metal_init: GPU name",
+            "ggml_metal_init: recommendedMaxWorkingSetSize",
         ];
-      
+    
         const extracted: Record<string, string> = {};
-      
+    
         for (const pattern of patterns) {
-          const escapedPattern = pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-          const regex = new RegExp(`${escapedPattern}\\s*[:=]\\s*(.+)`);
-          const match = logText.match(regex);
-          if (match) {
-            extracted[pattern] = match[1].trim();
-          }
+            const escapedPattern = pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+            const regex = new RegExp(`${escapedPattern}\\s*[:=]\\s*(.+)`);
+            const match = logText.match(regex);
+            if (match) {
+                extracted[pattern] = match[1].trim();
+            }
         }
-      
+    
         return extracted;
     };
 
@@ -571,7 +572,10 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
                 ...prev,
                 [resultKey]: true,
             }));
-            setSelectedLog(fileName);
+            setSelectedLogByModel((prev) => ({
+                ...prev,
+                [resultKey]: fileName,
+            }));
     
             const logFileUrl = `${GITHUB_LOG_URL}/${fileName}`;
             console.log("Fetching log file from URL:", logFileUrl); // Debugging
@@ -589,9 +593,17 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
             if (!fileResponse.ok) throw new Error("Failed to fetch log content");
             const content = await fileResponse.text();
     
-            setLogContent(content);
+            // Extract log summary
             const summary = extractLogValues(content);
-            setLogSummary(summary);
+            setLogSummaryByModel((prev) => ({
+                ...prev,
+                [resultKey]: summary, // Store the log summary for the specific resultKey
+            }));
+    
+            setLogContentByModel((prev) => ({
+                ...prev,
+                [resultKey]: content,
+            }));
     
             // Animate progress
             const interval = setInterval(() => {
@@ -615,8 +627,10 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
             }, 500); // Update every 500ms
         } catch (error) {
             console.error("Error fetching log content:", error);
-            setLogContent("⚠️ Failed to load content.");
-            setLogSummary({});
+            setLogContentByModel((prev) => ({
+                ...prev,
+                [resultKey]: "⚠️ Failed to load content.",
+            }));
             setIsDownloadingLogByModel((prev) => ({
                 ...prev,
                 [resultKey]: false,
@@ -633,26 +647,27 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
         });
     }, [selectedResults]);
     
-    const downloadLog = (format: "json" | "csv" | "log") => {
+    const downloadLog = (format: "json" | "csv" | "log", resultKey: string) => {
+        const selectedLog = selectedLogByModel[resultKey];
+        const logContent = logContentByModel[resultKey];
         if (!selectedLog || !logContent) return;
-      
+    
         let blob: Blob;
         let filename = selectedLog;
-      
+    
         if (format === "json") {
-          blob = new Blob([JSON.stringify({ content: logContent }, null, 2)], {
-            type: "application/json",
-          });
-          filename = filename.replace(".log", ".json");
+            blob = new Blob([JSON.stringify({ content: logContent }, null, 2)], {
+                type: "application/json",
+            });
+            filename = filename.replace(".log", ".json");
         } else if (format === "csv") {
-          // Treating the entire log file as a single column in CSV
-          const csvContent = `"log_content"\n"${logContent.replace(/"/g, '""')}"`;
-          blob = new Blob([csvContent], { type: "text/csv" });
-          filename = filename.replace(".log", ".csv");
+            const csvContent = `"log_content"\n"${logContent.replace(/"/g, '""')}"`;
+            blob = new Blob([csvContent], { type: "text/csv" });
+            filename = filename.replace(".log", ".csv");
         } else {
-          blob = new Blob([logContent], { type: "text/plain" });
+            blob = new Blob([logContent], { type: "text/plain" });
         }
-      
+    
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -693,6 +708,9 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
     useEffect(() => {
         fetchPassAt1Scores();
     }, []);
+    useEffect(() => {
+        console.log("Log Summary:", logSummary);
+    }, [logSummary]);
 
     const normalizeGraniteModelName = (modelName: string): string => {
         return modelName
@@ -1402,8 +1420,8 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
                                                                                                 }}
                                                                                             />
                                                                                         </p>
-                                                                                        <Button kind="ghost" size="sm" onClick={() => setIsModalOpen(true)}>View File</Button>
-                                                                                        <Button kind="ghost" size="sm" onClick={() => downloadLog("log")}>Download</Button>
+                                                                                        <Button kind="ghost" size="sm" onClick={() => setIsModalOpen(resultKey)}>View File</Button>
+                                                                                        <Button kind="ghost" size="sm" onClick={() => downloadLog("log", resultKey)}>Download</Button>
                                                                                     </div>
                                                                                 </div>
                                                                             )}
@@ -1536,63 +1554,113 @@ const [downloadedLogFileByModel, setDownloadedLogFileByModel] = useState<{ [key:
                 // </div>
             ) : (
                 <Modal
-                    open={isModalOpen}
-                    modalHeading={`Log Content: ${selectedLog}`}
+                    open={isModalOpen !== null}
+                    modalHeading={`Log Content: ${selectedLogByModel[isModalOpen || ""]}`}
                     passiveModal
-                    onRequestClose={() => setIsModalOpen(false)}
+                    onRequestClose={() => setIsModalOpen(null)}
                     size="lg"
                     className="log-modal"
                 >
-                    
-                    <> {isLoading ? (
-                        <div className="skeleton-wrap" style={{ display: "flex", flexDirection: "column", width: "300px", height: "350px", alignItems: "center", justifyContent: "center", margin: "4rem auto 0", padding: "1rem" }}>
-                            <DatePickerSkeleton range />
-                            <DatePickerSkeleton range />
-                        </div>
-                    ): (
+                    {isModalOpen && (
                         <>
-                            {Object.keys(logSummary).length > 0 && (
-                                <div>
-                                    <div style={{ margin: "1rem 0", display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
-                                        <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("json")}>Download JSON</Button>{" "}
-                                        <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("csv")}>Download CSV</Button>{" "}
-                                        {/* <Button kind="tertiary" renderIcon={Download} onClick={() => downloadLog("log")}>Download .log</Button> */}
-                                    </div>
-                                    <Tile className="log-summary-tile">
-                                        <h4>Log Summary</h4>
-                                        <div className="log-summary-content">
-                                            {Object.entries(logSummary).map(([key, value]) => {
-                                                const labelMap: Record<string, string> = {
-                                                    "general.basename str": "Basename:",
-                                                    "llm_load_print_meta: general.name": "General Name:",
-                                                    "llm_load_print_meta: model size": "Model Size:",
-                                                    "ggml_metal_init: found device": "User Device:",
-                                                    "ggml_metal_init: GPU name": "GPU Name:",
-                                                    "ggml_metal_init: recommendedMaxWorkingSetSize": "Recommended GPU Memory:"
-                                                };
-                                                return (
-                                                    <p key={key} style={{ marginBottom: "0.5rem" }}>
-                                                        <strong style={{ color: "#08BDBA" }}>{labelMap[key] || key}</strong>{" "}
-                                                        <span style={{ color: "#F1C21B" }}>{value}</span>
-                                                    </p>
-                                                );
-                                            })}
-                                        </div>
-                                    </Tile>
+                            {isLoading ? (
+                                <div
+                                    className="skeleton-wrap"
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        width: "300px",
+                                        height: "350px",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        margin: "4rem auto 0",
+                                        padding: "1rem",
+                                    }}
+                                >
+                                    <DatePickerSkeleton range />
+                                    <DatePickerSkeleton range />
                                 </div>
-                            )}
+                            ) : (
+                                <>
+                                    {logContentByModel[isModalOpen] ? (
+                                        <>
+                                            {Object.keys(logSummaryByModel[isModalOpen] || {}).length > 0 && (
+                                                <div>
+                                                    <div
+                                                        style={{
+                                                            margin: "1rem 0",
+                                                            display: "flex",
+                                                            gap: "1rem",
+                                                            justifyContent: "flex-end",
+                                                        }}
+                                                    >
+                                                        <Button
+                                                            kind="tertiary"
+                                                            renderIcon={Download}
+                                                            onClick={() => downloadLog("json", isModalOpen || "")}
+                                                        >
+                                                            Download JSON
+                                                        </Button>{" "}
+                                                        <Button
+                                                            kind="tertiary"
+                                                            renderIcon={Download}
+                                                            onClick={() => downloadLog("csv", isModalOpen || "")}
+                                                        >
+                                                            Download CSV
+                                                        </Button>{" "}
+                                                    </div>
+                                                    <Tile className="log-summary-tile">
+                                                        <h4>Log Summary</h4>
+                                                        <div className="log-summary-content">
+                                                            {Object.entries(logSummaryByModel[isModalOpen] || {}).map(([key, value]) => {
+                                                                const labelMap: Record<string, string> = {
+                                                                    "general.basename str": "Basename:",
+                                                                    "llama_model_loader: - kv   2:                               general.name str": "General Name:",
+                                                                    "llm_load_print_meta: model size": "Model Size:",
+                                                                    "ggml_metal_init: found device": "User Device:",
+                                                                    "ggml_metal_init: GPU name": "GPU Name:",
+                                                                    "ggml_metal_init: recommendedMaxWorkingSetSize":
+                                                                    "Recommended GPU Memory:",
+                                                                };
+                                                                return (
+                                                                    <p key={key} style={{ marginBottom: "0.5rem" }}>
+                                                                        <strong style={{ color: "#08BDBA" }}>
+                                                                            {labelMap[key] || key}
+                                                                        </strong>{" "}
+                                                                        <span style={{ color: "#F1C21B" }}>{value}</span>
+                                                                    </p>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </Tile>
+                                                </div>
+                                            )}
 
-                            <CodeSnippet
-                            key={`${selectedLog}-${Date.now()}`}
-                            type="multi"
-                            feedback="Copied to clipboard"
-                            className="log-content-snippet"
-                            >
-                                {logContent || "No content available"}
-                            </CodeSnippet>
+                                            <CodeSnippet
+                                                key={`${selectedLog}-${Date.now()}`}
+                                                type="multi"
+                                                feedback="Copied to clipboard"
+                                                className="log-content-snippet"
+                                            >
+                                                {logContentByModel[isModalOpen] || "No content available"}
+                                            </CodeSnippet>
+                                        </>
+                                    ) : (
+                                        <div
+                                            style={{
+                                                color: "#999",
+                                                textAlign: "center",
+                                                marginTop: "2rem",
+                                                fontSize: "1rem",
+                                            }}
+                                        >
+                                            Log content is not available. Please try again.
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </>
                     )}
-                    </>
                 </Modal>
             )}
         </div>
