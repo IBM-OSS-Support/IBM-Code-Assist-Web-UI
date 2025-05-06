@@ -734,8 +734,12 @@ const ModelComparison = () => {
         const currentModelScoreRaw = matchingKey ? modelScores[matchingKey]?.split("%")[0]?.trim() : undefined;
         const comparingModelName = selectedGranite === modelName ? selectedOther : selectedGranite;
         const comparingKey = Object.keys(modelScores).find((key) =>
-            key.toLowerCase() === normalizeGraniteModelName(comparingModelName ?? '').toLowerCase() // Strict equality check
+            key.toLowerCase().includes(normalizeGraniteModelName(comparingModelName ?? '').toLowerCase())
         );
+        
+        if (!comparingKey) {
+            console.warn(`No matching key found in modelScores for: ${normalizeGraniteModelName(comparingModelName ?? '')}`);
+        }
     
         const comparingModelScoreRaw = comparingKey ? modelScores[comparingKey]?.split("%")[0]?.trim() : undefined;
     
@@ -767,7 +771,8 @@ const ModelComparison = () => {
           setIsLoading(true);
           setTimeout(() => {
             setCompareClicked(true);
-            fetchPassAt1Scores();
+            // fetchPassAt1Scores();
+            getScoreAndTagType(selectedGranite || selectedOther || '');
             setIsLoading(false);
           }, 2000);
         }
